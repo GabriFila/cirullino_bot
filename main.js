@@ -33,14 +33,17 @@ admin.initializeApp({
   }),
   databaseURL: "https://cirullino-a81df.firebaseio.com"
 });
-/*
+
 const db = admin.firestore();
 
 db.collection("users")
   .doc("GabriFila")
   .get()
   .then(doc => console.log(doc.data()));
-*/
+
+db.collection("users")
+  .doc("vediamo")
+  .set({ hello: "word" });
 
 //create bot
 
