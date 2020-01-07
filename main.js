@@ -7,6 +7,18 @@ const { Markup } = Telegraf;
 const fetch = require("node-fetch");
 const admin = require("firebase-admin");
 
+//helper function
+const sendToUser = (chatId, text, buttons, columns) => {
+  bot.telegram.sendMessage(
+    chatId,
+    text,
+    Markup.keyboard(buttons, { columns: columns ? columns : buttons.length })
+      .oneTime()
+      .resize()
+      .extra()
+  );
+};
+
 require("dotenv").config();
 
 const URL = process.env.URL; // get the Heroku config var URL
@@ -36,19 +48,11 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-db.collection("users")
-  .doc("GabriFila")
-  .get()
-  .then(doc => console.log(doc.data()));
-
-db.collection("users")
-  .doc("vediamo")
-  .set({ hello: "word" });
-
 //create bot
 
 bot.start(ctx => {
-  const newUserRef = db.collection("users").doc(`${ctx.message.chat.username}`);
+  ctx.reply("Arrivo! Aspetta ancora un attimo");
+  const newUserRef = db.collection("users").doc(`${ctx.message.chat.username.toLowerCase()}`);
 
   newUserRef
     .get()
@@ -74,7 +78,7 @@ const getOpponent = new WizardScene(
   },
   ctx => {
     //check if user exists
-    const targetUsername = ctx.message.text;
+    const targetUsername = ctx.message.text.toLowerCase();
 
     const opponentRef = db.collection("users").doc(`${targetUsername}`);
     ctx.reply(`Controllo che l'utente abbia attivato il gioco...`);
@@ -90,7 +94,9 @@ const getOpponent = new WizardScene(
               let player1, player2;
               if (ctx.message.from.username < targetUsername) {
                 player1 = ctx.message.from.username;
+                chatId1 = ctx.message.chat.id;
                 player2 = targetUsername;
+                chatId2 = targetUser.chatId;
               } else {
                 player1 = targetUsername;
                 player2 = ctx.message.from.username;
@@ -111,6 +117,7 @@ const getOpponent = new WizardScene(
                 .then(doc => {
                   const shuffledDeck = doc.data().deck.sort(() => Math.random() - 0.5);
                   const newGame = {
+                    chatIds: [chatId1, chatId1],
                     deck: shuffledDeck,
                     hands: {
                       0: shuffledDeck.splice(0, 3),
@@ -127,10 +134,11 @@ const getOpponent = new WizardScene(
                       0: [],
                       1: []
                     },
-                    activeUser: player2
+                    activeUser: 0
                   };
                   groupGames.add(newGame).then(() => {
-                    ctx.session.newGame = newGame;
+                    ctx.session.game = newGame;
+                    console.log(newGame);
                     ctx.scene.enter("make-move");
                   });
                 })
@@ -157,14 +165,9 @@ const getOpponent = new WizardScene(
 const makeMove = new WizardScene(
   "make-move",
   ctx => {
-    console.log(ctx.session.data);
-    ctx.reply(
-      `Fai la tua mossa`,
-      Markup.keyboard(ctx.session.newGame.hands[0], { columns: 3 })
-        .oneTime()
-        .resize()
-        .extra()
-    );
+    game = ctx.session.game;
+    let messageToActive = `Fai la tua mossa\nIn tavola:   ${game.board.toString().replace(/,/gi, "   ")}`;
+    sendToUser(game.chatIds[game.activeUser], messageToActive, game.hands[game.activeUser]);
     return ctx.wizard.next();
   },
   ctx => {
@@ -188,9 +191,8 @@ bot.hears("test", ctx => {
   //ctx.scene.enter("make-move");
 });
 bot.on("text", ctx => {
-  console.log("veod");
+  console.log(ctx.message);
   ctx.reply(ctx.message.text);
-  ctx.reply(process.env.FIREBASE_CLIENT_EMAIL);
 });
 
 // keyboad setup
