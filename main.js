@@ -5,6 +5,7 @@ const session = require("telegraf/session");
 const WizardScene = require("telegraf/scenes/wizard");
 const { Markup } = Telegraf;
 const fetch = require("node-fetch");
+const admin = require("firebase-admin");
 
 require("dotenv").config();
 
@@ -23,6 +24,22 @@ if (process.env.NODE_ENV == "dev") {
   bot.telegram.setWebhook(`${URL}bot${BOT_TOKEN}`);
   bot.startWebhook(`/bot${BOT_TOKEN}`, null, PORT);
 }
+
+admin.initializeApp({
+  credential: admin.credential.cert({
+    project_id: process.env.FIREBASE_PROJECT_ID,
+    private_key: process.env.FIREBASE_PRIVATE_KEY,
+    client_email: process.env.FIREBASE_CLIENT_EMAIL
+  }),
+  databaseURL: "https://cirullino-a81df.firebaseio.com"
+});
+
+const db = admin.firestore();
+
+db.collection("users")
+  .doc("GabriFila")
+  .get()
+  .then(doc => console.log(doc.data()));
 
 //create bot
 
