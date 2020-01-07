@@ -24,7 +24,7 @@ if (process.env.NODE_ENV == "dev") {
   bot.telegram.setWebhook(`${URL}bot${BOT_TOKEN}`);
   bot.startWebhook(`/bot${BOT_TOKEN}`, null, PORT);
 }
-/*
+
 admin.initializeApp({
   credential: admin.credential.cert({
     project_id: process.env.FIREBASE_PROJECT_ID,
@@ -40,7 +40,7 @@ db.collection("users")
   .doc("GabriFila")
   .get()
   .then(doc => console.log(doc.data()));
-*/
+
 //create bot
 
 bot.start(ctx => {
