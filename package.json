@@ -1,0 +1,15 @@
+{
+  "name": "functions",
+  "description": "Cloud Functions for Firebase",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "node-fetch": "^2.6.0",
+    "telegraf": "^3.35.0"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^0.1.6"
+  }
+}
