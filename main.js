@@ -25,7 +25,6 @@ if (process.env.NODE_ENV == "dev") {
   bot.startWebhook(`/bot${BOT_TOKEN}`, null, PORT);
 }
 
-/*
 admin.initializeApp({
   credential: admin.credential.cert({
     project_id: process.env.FIREBASE_PROJECT_ID,
@@ -34,7 +33,7 @@ admin.initializeApp({
   }),
   databaseURL: "https://cirullino-a81df.firebaseio.com"
 });
-
+/*
 const db = admin.firestore();
 
 db.collection("users")
