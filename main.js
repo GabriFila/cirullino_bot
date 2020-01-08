@@ -11,6 +11,36 @@ const { leave } = Stage;
 require("dotenv").config();
 
 //helper function
+const cardToNumber = card => {
+  let value;
+  card = card.charAt(0);
+  switch (card) {
+    case "A":
+      value = 1;
+      break;
+    case "J":
+      value = 8;
+      break;
+    case "Q":
+      value = 9;
+      break;
+    case "K":
+      value = 10;
+      break;
+    default:
+      value = Number(card);
+  }
+  return value;
+};
+
+const areThereAces = board => {
+  let exit = false;
+  board.forEach(card => {
+    if (card.charAt(0) == "A") exit = true;
+  });
+  return exit;
+};
+
 const sendToUser = (chatId, text, buttons, columns) => {
   return bot.telegram.sendMessage(
     chatId,
@@ -80,6 +110,8 @@ const createGroup = new Scene("create-group");
 const prepGame = new Scene("prep-game");
 const showGameState = new Scene("show-game-state");
 const makeMove = new Scene("make-move");
+const isScopa = new Scene("is-scopa");
+const changeGameState = new Scene("change-game-state");
 
 // ANCHOR bot scenes
 
@@ -111,6 +143,7 @@ checkOpponent.on("text", ctx => {
       } else {
         ctx.reply(`@${ctx.message.text} non si è connesso a cirullino, introltragli questo link`);
         ctx.reply(` http://t.me/cirullino_bot `);
+        ctx.scene.leave();
       }
     })
     .catch(err => console.error(err));
@@ -198,7 +231,7 @@ showGameState.enter(ctx => {
 
   players.forEach((player, i) => {
     messages.push(
-      `In tavola:   ${cardify(game.board)}\nHai ${game.userStrongDeck[i].length} scope e ${game.userWeakDeck[i].length} carte nel mazzo`
+      `In tavola:   ${cardify(game.board)}\n${game.userStrongDeck[i].length} scope\n${game.userWeakDeck[i].length} carte nel mazzo`
     );
     console.log(players[i].chatId);
 
@@ -207,16 +240,23 @@ showGameState.enter(ctx => {
 });
 
 makeMove.enter(ctx => {
+  console.info(ctx.message.text);
   const { players, game } = ctx.scene;
   sendToUser(players[game.activeUser].chatId, `${players[game.activeUser].first_name} tocca a te! Gioca!`, game.hands[game.activeUser]);
 });
 
 makeMove.on("text", ctx => {
-  console.log(ctx.message.text);
-  ctx.scene.leave();
+  const { game } = ctx.scene;
+  let isScopa = false;
+  const usedCard = cardToNumber(ctx.message.text);
+  if (usedCard == 1 && !areThereAces(game.board)) ctx.scene.enter("change-game-state");
+  const boardTotal = game.board.map(card => cardToNumber(card)).reduce((acc, val) => acc + val, 0);
+  if (boardTotal == usedCard || boardTotal == 15) ctx.scene.enter("change-game-state");
 });
 
-makeMove.leave(ctx => ctx.reply("Bye"));
+isScopa.enter(() => {
+  console.log("SCOPAAAAAAAAAA");
+});
 //add bot scenes
 stage.register(getOpponent);
 stage.register(checkOpponent);
@@ -225,6 +265,8 @@ stage.register(createGroup);
 stage.register(prepGame);
 stage.register(showGameState);
 stage.register(makeMove);
+stage.register(isScopa);
+stage.register(changeGameState);
 
 bot.use(session());
 bot.use(stage.middleware());
