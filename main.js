@@ -137,7 +137,7 @@ checkOpponent.on("text", ctx => {
           .get()
           .then(startPlayerDoc => {
             startPlayer = { ...startPlayer, ...startPlayerDoc.data() };
-            ctx.scene.players = [startPlayer, { ...opponentDoc.data(), username: opponentRef.id }];
+            ctx.session.players = [startPlayer, { ...opponentDoc.data(), username: opponentRef.id }];
             ctx.scene.enter("call-opponent");
           });
       } else {
@@ -172,20 +172,20 @@ callOpponent.enter(ctx => {
 
 createGroup.enter(ctx => {
   console.info("create-group");
-  const { players } = ctx.scene;
+  const { players } = ctx.session;
   //sort players array based on username
   players.sort((a, b) => a.username > b.username);
   const newGroup = db.collection("groups").doc(composeGroupName(players.map(player => player.username)));
 
   newGroup.set({ players });
-  ctx.scene.newGroup = newGroup;
+  ctx.session.newGroup = newGroup;
   ctx.scene.enter("prep-game");
 });
 
 prepGame.enter(async ctx => {
   console.info("prep-game");
 
-  const { newGroup } = ctx.scene;
+  const { newGroup } = ctx.session;
   const groupGames = newGroup.collection("groupGames");
 
   db.collection("decks")
@@ -213,7 +213,7 @@ prepGame.enter(async ctx => {
         activeUser: getRandomInt(0, 2)
       };
       groupGames.add(newGame).then(() => {
-        ctx.scene.game = newGame;
+        ctx.session.game = newGame;
         ctx.scene.enter("show-game-state");
       });
     })
@@ -226,36 +226,38 @@ prepGame.enter(async ctx => {
 
 showGameState.enter(ctx => {
   console.info("make-move");
-  const { game, players } = ctx.scene;
+  const { game, players } = ctx.session;
   const messages = [];
 
   players.forEach((player, i) => {
     messages.push(
       `In tavola:   ${cardify(game.board)}\n${game.userStrongDeck[i].length} scope\n${game.userWeakDeck[i].length} carte nel mazzo`
     );
-    console.log(players[i].chatId);
 
     sendToUser(players[i].chatId, messages[i]).then(() => ctx.scene.enter("make-move"));
   });
 });
 
 makeMove.enter(ctx => {
-  console.info(ctx.message.text);
-  const { players, game } = ctx.scene;
+  const { players, game } = ctx.session;
   sendToUser(players[game.activeUser].chatId, `${players[game.activeUser].first_name} tocca a te! Gioca!`, game.hands[game.activeUser]);
 });
 
 makeMove.on("text", ctx => {
-  const { game } = ctx.scene;
+  console.info("make-move");
+  const { game } = ctx.session;
   let isScopa = false;
   const usedCard = cardToNumber(ctx.message.text);
-  if (usedCard == 1 && !areThereAces(game.board)) ctx.scene.enter("change-game-state");
+  if (usedCard == 1 && !areThereAces(game.board)) ctx.scene.enter("is-scopa");
   const boardTotal = game.board.map(card => cardToNumber(card)).reduce((acc, val) => acc + val, 0);
-  if (boardTotal == usedCard || boardTotal == 15) ctx.scene.enter("change-game-state");
+  if (boardTotal == usedCard || boardTotal == 15) ctx.session.enter("is-scopa");
+  ctx.scene.leave();
 });
 
 isScopa.enter(() => {
-  console.log("SCOPAAAAAAAAAA");
+  console.info("is-scopa");
+  ctx.reply("SCOPAAAAAAAAAA");
+  ctx.scene.leave();
 });
 //add bot scenes
 stage.register(getOpponent);
