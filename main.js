@@ -6,12 +6,11 @@ const { Markup } = Telegraf;
 const fetch = require("node-fetch");
 const admin = require("firebase-admin");
 const Scene = require("telegraf/scenes/base");
-const { leave } = Stage;
 
 require("dotenv").config();
 
 //helper function
-const cardToNumber = card => {
+const cardToValue = card => {
   let value;
   card = card.charAt(0);
   switch (card) {
@@ -54,12 +53,12 @@ const sendToUser = (chatId, text, buttons, columns) => {
   );
 };
 
-const cardify = cards => cards.toString().replace(/,/gi, "   ");
+const cardsToString = cards => cards.toString().replace(/,/gi, "   ");
 
 const getRandomInt = (min, max) => {
   min = Math.ceil(min);
   max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min)) + min; //Il max è escluso e il min è incluso
+  return Math.floor(Math.random() * (max - min)) + min;
 };
 
 const composeGroupName = usernames => {
@@ -76,7 +75,7 @@ const bot = new Telegraf(BOT_TOKEN);
 
 if (process.env.NODE_ENV == "dev") {
   fetch(`https://api.telegram.org/bot${BOT_TOKEN}/deleteWebhook`).then(() => {
-    console.info("webhook deleted");
+    console.info("webhook deleted for dev purpose");
     bot.startPolling();
   });
 } else {
@@ -101,17 +100,21 @@ const db = admin.firestore();
 const stage = new Stage();
 //stage.command("cancel", leave());
 
-// Scene registration
-
+// Bot scenes creation
 const getOpponent = new Scene("know-opponent");
 const checkOpponent = new Scene("check-opponent");
 const callOpponent = new Scene("call-opponent");
 const createGroup = new Scene("create-group");
 const prepGame = new Scene("prep-game");
 const showGameState = new Scene("show-game-state");
+const askMove = new Scene("ask-move");
 const makeMove = new Scene("make-move");
-const isScopa = new Scene("is-scopa");
-const changeGameState = new Scene("change-game-state");
+const invalidMove = new Scene("invalid-move");
+const moveAnalyser = new Scene("move-analyser");
+const scopa = new Scene("scopa");
+const take = new Scene("take");
+const drop = new Scene("drop");
+const shareMove = new Scene("share-move");
 
 // ANCHOR bot scenes
 
@@ -151,23 +154,64 @@ checkOpponent.on("text", ctx => {
 
 callOpponent.enter(ctx => {
   console.info("call-opponent");
+  const { players } = ctx.session;
 
   // TODO check if opponent wants to play
-  // ctx.reply(`Controllo che l'utente abbia attivato il gioco...`);
+  ctx.reply(`Controllo che l'utente abbia attivato il gioco...`);
 
-  // bot.telegram
   //success in sending message
+  ctx.session.opponents = players.filter(player => player.username != ctx.message.from.username.toLowerCase());
+  bot.telegram
+    .sendMessage(ctx.session.opponents[0].chatId, `Sei stato invitato a giocare, se vuoi entare rispondimi /enter`)
+    .then(() => {
+      const hasAccepted = players.map(player => false);
+      hasAccepted[players.findIndex(player => player.username == ctx.message.from.username.toLowerCase())] = true;
+      db.collection("pendingGames").add({
+        players: players.map(elm => elm.username),
+        hasAccepted,
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+      // ctx.scene.enter("create-group");
+      //create a pending game with state pending and players
+      ctx.scene.leave();
+    })
+    .catch(err => {
+      console.error(err);
+      ctx.reply(`C'è stato un problema, contatta lo sviluppatore`);
+    });
+});
 
-  //   .sendMessage(opponent.chatId, `${opponent.first_name} sei stato invitato a giocare`)
-  //   .then(() => {
-  //     ctx.scene.enter("prep-game");
-  //   })
-  //   .catch(err => {
-  //     console.error(err);
-  //     ctx.reply(`C'è stato un problema, contatta lo sviluppatore`);
-  //   });
+callOpponent.leave(() => console.log("left call-opponent"));
 
-  ctx.scene.enter("create-group");
+bot.command("enter", ctx => {
+  console.log("/enter");
+  //check if there is a pending game with the username
+  //if there is , it changes the corresponding state of the player and then if all the players are true the game starts
+
+  const pendingGameRef = db.collection("pendingGames").where("players", "array-contains", `${ctx.message.from.username.toLowerCase()}`);
+  pendingGameRef.get().then(function(querySnapshot) {
+    querySnapshot.forEach(function(doc) {
+      let updatedPlayers = doc.data();
+      updatedPlayers.hasAccepted[doc.data().players.indexOf(ctx.message.from.username.toLowerCase())] = true;
+      if (updatedPlayers.hasAccepted.every(elm => elm == true)) doc.ref.delete();
+
+      console.info("create-group");
+      const { players } = updatedPlayers;
+      //sort players array based on username
+      const newGroup = db.collection("groups").doc(composeGroupName(players.sort()));
+      // TODO add chatIds
+      newGroup.set({});
+    });
+  });
+});
+
+bot.command("refuse", () => {
+  console.log("entered");
+  // TODO implement refusing possibility
+});
+
+bot.hears(/^[A0123456789JQK♥️♦♣♠]{2}$/, ctx => {
+  //when bot receives a card it checks if the user has an active game, if so it checks if it is the active user, then processes the move e updates the other players
 });
 
 createGroup.enter(ctx => {
@@ -201,7 +245,7 @@ prepGame.enter(async ctx => {
         },
         board: shuffledDeck.splice(0, 4),
         points: 0,
-        movesRecord: [],
+        moves: [],
         userStrongDeck: {
           0: [],
           1: []
@@ -212,7 +256,7 @@ prepGame.enter(async ctx => {
         },
         activeUser: getRandomInt(0, 2)
       };
-      groupGames.add(newGame).then(() => {
+      groupGames.add({ ...newGame, createdAt: admin.firestore.FieldValue.serverTimestamp() }).then(() => {
         ctx.session.game = newGame;
         ctx.scene.enter("show-game-state");
       });
@@ -231,34 +275,61 @@ showGameState.enter(ctx => {
 
   players.forEach((player, i) => {
     messages.push(
-      `In tavola:   ${cardify(game.board)}\n${game.userStrongDeck[i].length} scope\n${game.userWeakDeck[i].length} carte nel mazzo`
+      `In tavola:   ${cardsToString(game.board)}\n${game.userStrongDeck[i].length} scope\n${game.userWeakDeck[i].length} carte nel mazzo`
     );
-
-    sendToUser(players[i].chatId, messages[i]).then(() => ctx.scene.enter("make-move"));
+    sendToUser(players[i].chatId, messages[i]);
   });
+  ctx.scene.enter("ask-move");
 });
 
-makeMove.enter(ctx => {
+askMove.enter(ctx => {
+  console.info("ask-move");
   const { players, game } = ctx.session;
   sendToUser(players[game.activeUser].chatId, `${players[game.activeUser].first_name} tocca a te! Gioca!`, game.hands[game.activeUser]);
+  // FIXME promise logic
+  ctx.scene.enter("make-move");
 });
 
-makeMove.on("text", ctx => {
-  console.info("make-move");
+makeMove.on(/[A0123456789JQK♥️♦♣♠]+/, ctx => {
   const { game } = ctx.session;
-  let isScopa = false;
-  const usedCard = cardToNumber(ctx.message.text);
-  if (usedCard == 1 && !areThereAces(game.board)) ctx.scene.enter("is-scopa");
-  const boardTotal = game.board.map(card => cardToNumber(card)).reduce((acc, val) => acc + val, 0);
-  if (boardTotal == usedCard || boardTotal == 15) ctx.session.enter("is-scopa");
-  ctx.scene.leave();
+  const { activeUser } = game;
+  if (!game.hands[activeUser].includes(ctx.message.text)) ctx.scene.enter("invalid-move");
+
+  game.hand[activeUser].pop(ctx.message.text);
+  game.moves.push({ user: activeUser, cardPlayed: ctx.message.text });
+
+  ctx.scene.enter("move-analyser");
 });
 
-isScopa.enter(() => {
-  console.info("is-scopa");
-  ctx.reply("SCOPAAAAAAAAAA");
-  ctx.scene.leave();
+invalidMove.enter(ctx => {
+  ctx.reply("Non puoi giocare questa carta perchè non è nella tua mano");
+  ctx.scene.enter("make-move");
 });
+
+moveAnalyser.enter(ctx => {
+  console.info("move-analyser");
+  const { game } = ctx.session;
+  const usedCard = cardToValue(game.moves[0].cardPlayed);
+  if (usedCard == 1 && !areThereAces(game.board)) ctx.scene.enter("scopa");
+  const boardTotal = game.board.map(card => cardToValue(card)).reduce((acc, val) => acc + val, 0);
+  if (boardTotal == usedCard || boardTotal == 15) ctx.scene.enter("scopa");
+  // TODO find all possible labels
+});
+
+scopa.enter(ctx => {
+  console.info("scopa");
+  const { game } = ctx.session;
+
+  game.moves[0].type = "scopa";
+  game.moves[0].tookCards = game.board;
+  game.board = [];
+  game.userStrongDeck[activeUser]++;
+
+  ctx.reply("SCOPAAAAAAAAAA");
+  ctx.scene.enter("share-move");
+});
+
+shareMove.enter(ctx => {});
 //add bot scenes
 stage.register(getOpponent);
 stage.register(checkOpponent);
@@ -266,9 +337,14 @@ stage.register(callOpponent);
 stage.register(createGroup);
 stage.register(prepGame);
 stage.register(showGameState);
+stage.register(askMove);
 stage.register(makeMove);
-stage.register(isScopa);
-stage.register(changeGameState);
+stage.register(moveAnalyser);
+stage.register(invalidMove);
+stage.register(scopa);
+stage.register(take);
+stage.register(drop);
+stage.register(shareMove);
 
 bot.use(session());
 bot.use(stage.middleware());
@@ -276,23 +352,36 @@ bot.use(stage.middleware());
 // ANCHOR bot commands
 bot.start(ctx => {
   console.info("/start");
-  ctx.reply("Arrivo! Aspetta ancora un attimo");
-  const newUserRef = db.collection("users").doc(`${ctx.message.chat.username.toLowerCase()}`);
+  if ("username" in ctx.message.from) {
+    ctx.reply(`Sei pronto a giocare un cirullino con i tuoi amici? 🃏`);
+    const newUserRef = db.collection("users").doc(`${ctx.message.from.username.toLowerCase()}`);
 
-  newUserRef
-    .get()
-    .then(doc => {
-      if (!doc.exists) {
-        newUserRef.set({
-          chatId: ctx.message.chat.id,
-          first_name: ctx.message.chat.first_name,
-          wins: 0,
-          losses: 0
-        });
-        ctx.reply("Benvenuto! 🎉 \nSei pronto a giocare un cirullino con i tuoi amici? 🃏 \nDimmi come vuoi procedere!");
-      } else ctx.reply(`Bentornato ${ctx.message.chat.first_name}🎉 \nDimmi come vuoi procedere!`);
-    })
-    .catch(err => console.error(err));
+    newUserRef
+      .get()
+      .then(doc => {
+        if (!doc.exists) {
+          newUserRef.set({
+            chatId: ctx.message.chat.id,
+            first_name: ctx.message.chat.first_name,
+            wins: 0,
+            losses: 0
+          });
+        } else {
+          newUserRef.set(
+            {
+              chatId: ctx.message.chat.id,
+              first_name: ctx.message.chat.first_name
+            },
+            { merge: true }
+          );
+        }
+        ctx.reply("Dimmi come vuoi procedere!");
+      })
+      .catch(err => console.error(err));
+  } else
+    ctx.reply(
+      "Grazie per voler giocare! Manca ancora una cosa però, devi impostare il tuo username su telegram, altrimenti gli altri non potranno giocare con te!\nQuando hai fatto, rimandami il comando /start e potrai giocare"
+    );
 });
 
 bot.command("newgame", ctx => {
@@ -306,7 +395,9 @@ bot.command("help", ctx => {
 });
 
 //test purpose commands
-bot.hears("test", ctx => {});
+bot.hears("test", ctx => {
+  ctx.reply(ctx.message.chat.id);
+});
 // bot.on("text", ctx => {
 //   console.log(ctx.message);
 //   ctx.reply(ctx.message.text);
@@ -329,3 +420,15 @@ bot.hears("test", ctx => {});
 // greeter.hears(/spegniti/gi, leave());
 
 // greeter.leave(ctx => ctx.reply("Bye"));
+
+// let initState = true;
+// db.collection("users")
+//   .doc("319948189")
+//   .onSnapshot(doc => {
+//     if (!initState) console.log(doc.data());
+//     initState = false;
+//   });
+
+// db.collection("users")
+//   .doc("319948189")
+//   .set({ chatId: 3 }, { merge: true });
