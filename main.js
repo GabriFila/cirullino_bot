@@ -204,6 +204,7 @@ bot.command("enter", ctx => {
                   );
                   sendToUser(game.chatIds[i], messages[i]);
                 });
+                // TODO add logic for multiple promises
                 const { activeUser } = game;
                 sendToUser(game.chatIds[activeUser], "Tocca a te", game.hands[activeUser]);
               });
@@ -220,8 +221,22 @@ bot.command("refuse", () => {
   // TODO implement possibility to refuse entering the game
 });
 
-bot.hears(/^[A0123456789JQK♥️♦♣♠]{2}$/, ctx => {
+bot.on("text", ctx => {
+  // FIXME solve regex matching
+  //check if there is an active game
+
+  //check if move is valid
+  //update game state
+
+  const { text } = ctx.message;
+
+  if (/[A0123456789JQK][♥️♦♣♠]/.test(text)) console.log("correct");
+});
+
+bot.hears(/[A0123456789JQK][♥️♦♣♠]/, ctx => {
+  console.log("here");
   //when bot receives a card it checks if the user has an active game, if so it checks if it is the active user, then processes the move e updates the other players
+  console.log(ctx.message.text);
 });
 
 askMove.enter(ctx => {
