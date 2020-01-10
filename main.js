@@ -6,7 +6,7 @@ const Scene = require("telegraf/scenes/base");
 const { Extra, Markup } = Telegraf;
 //help dependacies
 const fetch = require("node-fetch");
-const { cardsToString, getRandomInt, areThereAces, cardToValue, composeGroupName } = require("./helpers");
+const { cardsToString, getRandomInt, areThereAces, cardToValue, composeGroupName, isSuccessfulMove } = require("./helpers");
 
 //firebase dependacies
 const admin = require("firebase-admin");
@@ -159,7 +159,7 @@ bot.command("enter", ctx => {
       const { usernames } = updatedPlayers;
       const newGroupDbRef = db.collection("groups").doc(composeGroupName(usernames));
 
-      newGroupDbRef.set({});
+      newGroupDbRef.set({ usernames });
 
       db.collection("decks")
         .doc("40cards")
@@ -172,6 +172,7 @@ bot.command("enter", ctx => {
               0: shuffledDeck.splice(0, 3),
               1: shuffledDeck.splice(0, 3)
             },
+            // TODO implement possibility of 'a monte' with 2 aces and sum of cards in board
             board: shuffledDeck.splice(0, 4),
             points: 0,
             moves: [],
@@ -190,6 +191,7 @@ bot.command("enter", ctx => {
             .collection("groupGames")
             .add({ ...newGame, createdAt: admin.firestore.FieldValue.serverTimestamp() })
             .then(gameDbRef => {
+              newGroupDbRef.set({ activeGame: gameDbRef }, { merge: true });
               console.info("game-created");
               //start game by making listener on updates on game object and pushing them to all connected users
               gameDbRef.onSnapshot(doc => {
@@ -221,31 +223,56 @@ bot.command("refuse", () => {
   // TODO implement possibility to refuse entering the game
 });
 
-bot.on("text", ctx => {
-  // FIXME solve regex matching
-  //check if there is an active game
-
-  //check if move is valid
-  //update game state
+bot.hears(/[A0123456789JQK][♥️♦♣♠]/, ctx => {
+  //when bot receives a card it checks if the user has an active game, if so it checks if it is the active user, then processes the move e updates the other players
 
   const { text } = ctx.message;
+  console.info("reiceved card");
+  //user message is a card
+  //check if there is an active game
 
-  if (/[A0123456789JQK][♥️♦♣♠]/.test(text)) console.log("correct");
+  const senderUsername = ctx.message.from.username.toLowerCase();
+  db.collection("groups")
+    .where("usernames", "array-contains", senderUsername)
+    .get()
+    .then(docs =>
+      docs.forEach(doc => {
+        doc
+          .data()
+          .activeGame.get()
+          .then(doc => {
+            //check if move is valid
+            const game = doc.data();
+            const { activeUser } = game;
+            console.info("validating move");
+            if (!game.hands[activeUser].includes(ctx.message.text)) ctx.reply(`Hai giocato una carta che non hai in mano`);
+            else {
+              game.hand[activeUser].pop(ctx.message.text); //remove used card from player hand
+              game.moves.push({ user: activeUser, cardPlayed: ctx.message.text }); //start creating game move record
+              console.info("analysing move");
+              const usedCard = cardToValue(ctx.message.text);
+            }
+          });
+        //update game state
+      })
+    );
 });
 
-bot.hears(/[A0123456789JQK][♥️♦♣♠]/, ctx => {
-  console.log("here");
-  //when bot receives a card it checks if the user has an active game, if so it checks if it is the active user, then processes the move e updates the other players
-  console.log(ctx.message.text);
-});
+const elaborateMove = (usedCard, board, activeDeck, passiveDeck) => {
+  //check if card is ace
+  if (usedCard == 1 && !areThereAces(board)) return "scopa";
 
-askMove.enter(ctx => {
-  console.info("ask-move");
-  const { players, game } = ctx.session;
-  sendToUser(players[game.activeUser].chatId, `${players[game.activeUser].first_name} tocca a te! Gioca!`, game.hands[game.activeUser]);
-  // FIXME promise logic
-  ctx.scene.enter("make-move");
-});
+  const boardTotal = board.map(card => cardToValue(card)).reduce((acc, val) => acc + val, 0);
+  if (boardTotal == usedCard || boardTotal == 15) return "scopa";
+  const combinations = [];
+  // check if user wants to make 15
+  isSuccessfulMove([], [cardToValue(usedCard), ...board.map(card => cardToValue(card))], 15, combinations);
+  if (combinations.length > 0) {
+    //theere is a successful combination
+    return "cirulla";
+  } else {
+  }
+};
 
 makeMove.on(/[A0123456789JQK♥️♦♣♠]+/, ctx => {
   const { game } = ctx.session;
@@ -256,21 +283,6 @@ makeMove.on(/[A0123456789JQK♥️♦♣♠]+/, ctx => {
   game.moves.push({ user: activeUser, cardPlayed: ctx.message.text });
 
   ctx.scene.enter("move-analyser");
-});
-
-invalidMove.enter(ctx => {
-  ctx.reply("Non puoi giocare questa carta perchè non è nella tua mano");
-  ctx.scene.enter("make-move");
-});
-
-moveAnalyser.enter(ctx => {
-  console.info("move-analyser");
-  const { game } = ctx.session;
-  const usedCard = cardToValue(game.moves[0].cardPlayed);
-  if (usedCard == 1 && !areThereAces(game.board)) ctx.scene.enter("scopa");
-  const boardTotal = game.board.map(card => cardToValue(card)).reduce((acc, val) => acc + val, 0);
-  if (boardTotal == usedCard || boardTotal == 15) ctx.scene.enter("scopa");
-  // TODO find all possible labels
 });
 
 scopa.enter(ctx => {
@@ -292,8 +304,6 @@ stage.register(checkOpponent);
 stage.register(callOpponent);
 stage.register(askMove);
 stage.register(makeMove);
-stage.register(moveAnalyser);
-stage.register(invalidMove);
 stage.register(scopa);
 stage.register(take);
 stage.register(drop);
@@ -347,15 +357,6 @@ bot.command("help", ctx => {
   ctx.reply(`Se hai delle necessità su questo bot scrvi una mail a gabriele.filaferro@gmail.com`);
 });
 
-//test purpose commands
-bot.hears("test", ctx => {
-  ctx.reply(ctx.message.chat.id);
-});
-// bot.on("text", ctx => {
-//   console.log(ctx.message);
-//   ctx.reply(ctx.message.text);
-// });
-
 //suit emojis
 //♥️
 //♦
@@ -366,26 +367,4 @@ bot.hears("test", ctx => {
 //to have separate buttons in keyboard for cards in hand
 //[["one"], ["two", "three"]]
 // const saluter = new Scene("saluter");
-// saluter.hears(/ciccia/gi, ctx => ctx.reply("Bella"));
-
-// saluter.enter(ctx => console.log(ctx.session.data));
-// greeter.enter(ctx => ctx.reply("Entrato"));
-// greeter.hears(/spegniti/gi, leave());
-
-// greeter.leave(ctx => ctx.reply("Bye"));
-
-//to get updates
-// let initState = true;
-// db.collection("users")
-//   .doc("319948189")
-//   .onSnapshot(doc => {
-//     if (!initState) console.log(doc.data());
-//     initState = false;
-//   });
-
-// db.collection("users")
-//   .doc("319948189")
-//   .set({ chatId: 3 }, { merge: true });
-
-//to leave a scene
-//stage.command("cancel", leave());
+// saluter.hears(/ciccia/gi,

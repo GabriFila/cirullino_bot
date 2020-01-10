@@ -41,3 +41,43 @@ module.exports.areThereAces = board => {
   });
   return exit;
 };
+
+module.exports.getBoard = deck => {
+  const board = deck.splice(0, 4);
+  board
+    .filter(card => cardToValue(card) == 1)
+    .forEach((ace, i) => {
+      if (i > 0) {
+        //move ace from board to deck
+        deck.push(board.splice(board.indexOf(ace), 1));
+        let newCard = deck.splice(0, 1);
+        while (cardToValu(newCard) == 1) {
+          deck.push(newCard);
+          newCard = deck.splice(0, 1);
+        }
+        board.push(newCard);
+      } else {
+        console.log("Too many aces in deck");
+      }
+    });
+};
+
+// to call isSuccessfulMove([], boardAndCard, 15);
+module.exports.isSuccessfulMove = (read, totalCards, targetSum, sets) => {
+  if (read.length == 4 || (read.length <= 4 && totalCards.length == 0)) {
+    if (read.length > 0) {
+      let total = read.reduce(function(a, b) {
+        return a + b;
+      }, 0);
+      // TODO implement possibility of multiple fifteen
+      if (sums.indexOf(total) == -1 && total == targetSum) {
+        sums.push(total);
+        sets.push(read.slice().sort());
+        return;
+      }
+    }
+  } else {
+    isSuccessfulMove(read.concat(totalCards[0]), totalCards.slice(1), targetSum);
+    isSuccessfulMove(read, totalCards.slice(1), targetSum);
+  }
+};
