@@ -34,13 +34,19 @@ module.exports.cardToValue = card => {
   return value;
 };
 
-module.exports.areThereAces = board => {
+const areThereAces = board => {
+  console.log("inside areThereAces", board);
   let exit = false;
   board.forEach(card => {
-    if (card.charAt(0) == "A") exit = true;
+    if (card.charAt(0) == "A") {
+      console.log("found ace ");
+      exit = true;
+    }
   });
   return exit;
 };
+
+module.exports.areThereAces = areThereAces;
 
 module.exports.getBoard = deck => {
   const board = deck.splice(0, 4);
@@ -62,22 +68,27 @@ module.exports.getBoard = deck => {
     });
 };
 
-// to call isSuccessfulMove([], boardAndCard, 15);
-module.exports.isSuccessfulMove = (read, totalCards, targetSum, sets) => {
-  if (read.length == 4 || (read.length <= 4 && totalCards.length == 0)) {
-    if (read.length > 0) {
-      let total = read.reduce(function(a, b) {
-        return a + b;
-      }, 0);
-      // TODO implement possibility of multiple fifteen
-      if (sums.indexOf(total) == -1 && total == targetSum) {
-        sums.push(total);
-        sets.push(read.slice().sort());
-        return;
+module.exports.possibleCombs = array => {
+  let fn = function(n, src, got, all) {
+    if (n == 0) {
+      if (got.length > 0) {
+        all[all.length] = got;
       }
+      return;
     }
-  } else {
-    isSuccessfulMove(read.concat(totalCards[0]), totalCards.slice(1), targetSum);
-    isSuccessfulMove(read, totalCards.slice(1), targetSum);
+    for (let j = 0; j < src.length; j++) {
+      fn(n - 1, src.slice(j + 1), got.concat([src[j]]), all);
+    }
+    return;
+  };
+
+  let all = [];
+
+  for (let i = 1; i < array.length; i++) {
+    fn(i, array, [], all);
   }
+
+  all.push(array);
+
+  return all;
 };
