@@ -34,10 +34,61 @@ module.exports.cardToValue = card => {
   return value;
 };
 
-module.exports.areThereAces = board => {
+const areThereAces = board => {
+  console.log("inside areThereAces", board);
   let exit = false;
   board.forEach(card => {
-    if (card.charAt(0) == "A") exit = true;
+    if (card.charAt(0) == "A") {
+      console.log("found ace ");
+      exit = true;
+    }
   });
   return exit;
+};
+
+module.exports.areThereAces = areThereAces;
+
+module.exports.getBoard = deck => {
+  const board = deck.splice(0, 4);
+  board
+    .filter(card => cardToValue(card) == 1)
+    .forEach((ace, i) => {
+      if (i > 0) {
+        //move ace from board to deck
+        deck.push(board.splice(board.indexOf(ace), 1));
+        let newCard = deck.splice(0, 1);
+        while (cardToValu(newCard) == 1) {
+          deck.push(newCard);
+          newCard = deck.splice(0, 1);
+        }
+        board.push(newCard);
+      } else {
+        console.log("Too many aces in deck");
+      }
+    });
+};
+
+module.exports.possibleCombs = array => {
+  let fn = function(n, src, got, all) {
+    if (n == 0) {
+      if (got.length > 0) {
+        all[all.length] = got;
+      }
+      return;
+    }
+    for (let j = 0; j < src.length; j++) {
+      fn(n - 1, src.slice(j + 1), got.concat([src[j]]), all);
+    }
+    return;
+  };
+
+  let all = [];
+
+  for (let i = 1; i < array.length; i++) {
+    fn(i, array, [], all);
+  }
+
+  all.push(array);
+
+  return all;
 };
