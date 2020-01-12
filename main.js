@@ -6,7 +6,16 @@ const Scene = require("telegraf/scenes/base");
 const { Extra, Markup } = Telegraf;
 //help dependacies
 const fetch = require("node-fetch");
-const { cardsToString, getRandomInt, areThereAces, cardToValue, composeGroupName, isSuccessfulMove, possibleCombs } = require("./helpers");
+const {
+  cardsToString,
+  getRandomInt,
+  areThereAces,
+  cardToValue,
+  composeGroupName,
+  possibleCombs,
+  circularNext,
+  elaborateMove
+} = require("./helpers");
 
 //firebase dependacies
 const admin = require("firebase-admin");
@@ -200,6 +209,7 @@ bot.command("enter", ctx => {
                 });
                 // TODO add logic for multiple promises
                 const { activeUser } = game;
+                // TODO sei to ohter whose turn it is
                 sendToUser(game.chatIds[activeUser], "Tocca a te", game.hands[activeUser]);
               });
             });
@@ -216,6 +226,7 @@ bot.command("refuse", () => {
 });
 
 bot.hears(/[A0123456789JQK][♥️♦♣♠]/, ctx => {
+  // TODO check if user is in game
   //when bot receives a card it checks if the user has an active game, if so it checks if it is the active user, then processes the move e updates the other players
 
   const { text } = ctx.message;
@@ -240,7 +251,7 @@ bot.hears(/[A0123456789JQK][♥️♦♣♠]/, ctx => {
             if (!game.hands[activeUser].includes(ctx.message.text)) ctx.reply(`Hai giocato una carta che non hai in mano`);
             else {
               game.hands[activeUser].pop(ctx.message.text); //remove used card from player hand
-              game.moves.push({ user: activeUser, cardPlayed: ctx.message.text }); //start creating game move record
+              game.moves.unshift({ user: activeUser, cardPlayed: ctx.message.text }); //start creating game move record
               console.info("analysing move");
               const usedCard = ctx.message.text;
               const cardsRemoved = [];
@@ -252,90 +263,40 @@ bot.hears(/[A0123456789JQK][♥️♦♣♠]/, ctx => {
                 cardsRemoved
               );
 
-              console.log("esito", gameResult);
-              console.log("board", game.board);
-              console.log("card removed", cardsRemoved);
-              console.log("strong deck", game.userStrongDeck[activeUser]);
-              console.log("weak deck", game.userWeakDeck[activeUser]);
+              let messagge = "";
+
+              switch (gameResult) {
+                case "scopa":
+                  messagge += `fatto scopa con ${usedCard}`;
+                  break;
+                case "presa con 15":
+                case "presa normale":
+                  messagge += `preso ${cardsRemoved.map(card => `${card} `)} con ${usedCard}`;
+                  break;
+                case "calata":
+                  messagge += `calato ${usedCard}`;
+                  break;
+              }
+
+              game.chatIds.forEach((chatId, i) => {
+                if (i != activeUser) sendToUser(chatId, ctx.message.from.first_name + ` ha ` + messagge);
+                else sendToUser(chatId, `Hai ` + messagge);
+              });
+
+              game.moves[0].type = gameResult;
+
+              game.activeUser = circularNext(activeUser, game.chatIds);
+              console.log("weak deck: ", game.userWeakDeck);
+              doc.ref
+                .set(game)
+                .then(() => console.log("game updated"))
+                .catch(err => console.error(err));
             }
           });
         //update game state
       })
     );
 });
-
-const elaborateMove = (usedCard, board, strongDeck, weakDeck, cardsRemoved) => {
-  //check if card is ace
-  const usedCardValue = cardToValue(usedCard);
-
-  //check if scopa with ace
-  if (usedCardValue == 1 && !areThereAces(board)) {
-    strongDeck.push(usedCard);
-    weakDeck.push([...board]);
-    cardsRemoved.push([...board]);
-    board.splice(0, board.length);
-    return "scopa";
-  }
-
-  //check if scopa with total of board equal to used card
-  const boardTotal = board.map(card => cardToValue(card)).reduce((acc, val) => acc + val, 0);
-  if (boardTotal == usedCardValue || boardTotal + usedCard == 15) {
-    strongDeck.push(usedCard);
-    weakDeck.push([...board]);
-    cardsRemoved.push([...board]);
-    board.splice(0, board.length);
-    return "scopa";
-  }
-
-  //check if 'presa da 15'
-
-  // all possible combinations of board
-  let allCombinations = possibleCombs([usedCard, ...board]);
-  // take all the combinations that include the usedCard and of those the ones which sum up to 15
-  let combs15 = allCombinations
-    .filter(comb => comb.includes(usedCard))
-    .filter(elm => elm.reduce((acc, val) => (acc += cardToValue(val)), 0) == 15);
-
-  if (combs15.length > 0) {
-    //there is a 15 combination
-    //pick the first combination
-    // TODO let user choose his own move
-    firstComb15 = combs15[0];
-
-    //put good combination of card to weak deck
-    weakDeck.push([...firstComb15]);
-
-    //remove used card from good combination
-    firstComb15.splice(firstComb15.indexOf(usedCard), 1);
-
-    cardsRemoved.push([...firstComb15]);
-
-    //remove good combination from board
-    firstComb15.forEach(card => board.splice(board.indexOf(card), 1));
-    return "presa con 15";
-  } else {
-    // take all the combinations that include the usedCard and of those the ones which sum up to 15
-    allCombinations = possibleCombs([...board]);
-    console.log("all combs", allCombinations);
-    const combsUsedCard = allCombinations.filter(elm => elm.reduce((acc, val) => (acc += cardToValue(val)), 0) == usedCardValue);
-    console.log("combsUsedCard", combsUsedCard);
-
-    if (combsUsedCard.length > 0) {
-      // console.log("combinations: ", combinations);
-      firstComb = combsUsedCard[0];
-      weakDeck.push([...firstComb, usedCard]);
-
-      cardsRemoved.push([...firstComb]);
-
-      firstComb.forEach(card => board.splice(board.indexOf(card), 1));
-
-      return "presa normale";
-    } else {
-      board.push(usedCard);
-      return "calata";
-    }
-  }
-};
 
 //add bot scenes
 stage.register(getOpponent);
