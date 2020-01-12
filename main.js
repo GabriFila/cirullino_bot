@@ -243,8 +243,20 @@ bot.hears(/[A0123456789JQK][♥️♦♣♠]/, ctx => {
               game.moves.push({ user: activeUser, cardPlayed: ctx.message.text }); //start creating game move record
               console.info("analysing move");
               const usedCard = ctx.message.text;
-              const gameResult = elaborateMove(usedCard, game.board);
-              console.log(gameResult);
+              const cardsRemoved = [];
+              const gameResult = elaborateMove(
+                usedCard,
+                game.board,
+                game.userStrongDeck[activeUser],
+                game.userWeakDeck[activeUser],
+                cardsRemoved
+              );
+
+              console.log("esito", gameResult);
+              console.log("board", game.board);
+              console.log("card removed", cardsRemoved);
+              console.log("strong deck", game.userStrongDeck[activeUser]);
+              console.log("weak deck", game.userWeakDeck[activeUser]);
             }
           });
         //update game state
@@ -252,34 +264,76 @@ bot.hears(/[A0123456789JQK][♥️♦♣♠]/, ctx => {
     );
 });
 
-const elaborateMove = (usedCard, board, activeDeck, passiveDeck) => {
+const elaborateMove = (usedCard, board, strongDeck, weakDeck, cardsRemoved) => {
   //check if card is ace
   const usedCardValue = cardToValue(usedCard);
-  console.log("valore carta usata:", usedCardValue);
-  if (usedCardValue == 1 && !areThereAces(board)) return "scopa";
 
+  //check if scopa with ace
+  if (usedCardValue == 1 && !areThereAces(board)) {
+    strongDeck.push(usedCard);
+    weakDeck.push([...board]);
+    cardsRemoved.push([...board]);
+    board.splice(0, board.length);
+    return "scopa";
+  }
+
+  //check if scopa with total of board equal to used card
   const boardTotal = board.map(card => cardToValue(card)).reduce((acc, val) => acc + val, 0);
-  if (boardTotal == usedCardValue || boardTotal + usedCard == 15) return "scopa";
-  // check if user wants to make 15
-  //isSuccessfulMove([], [usedCardValue, ...board.map(card => cardToValue(card))], 15, combinations);
-  let combinations = possibleCombs([usedCard, ...board]);
-  console.log("combionations", combinations);
-  const combs15 = combinations.filter(elm => elm.reduce((acc, val) => (acc += cardToValue(val)), 0) == 15);
-  console.log("combs15", combs15);
+  if (boardTotal == usedCardValue || boardTotal + usedCard == 15) {
+    strongDeck.push(usedCard);
+    weakDeck.push([...board]);
+    cardsRemoved.push([...board]);
+    board.splice(0, board.length);
+    return "scopa";
+  }
+
+  //check if 'presa da 15'
+
+  // all possible combinations of board
+  let allCombinations = possibleCombs([usedCard, ...board]);
+  // take all the combinations that include the usedCard and of those the ones which sum up to 15
+  let combs15 = allCombinations
+    .filter(comb => comb.includes(usedCard))
+    .filter(elm => elm.reduce((acc, val) => (acc += cardToValue(val)), 0) == 15);
+
   if (combs15.length > 0) {
-    //theere is a successful combination
-    console.log("presa con 15");
-    console.log("combinations: ", combinations);
+    //there is a 15 combination
+    //pick the first combination
+    // TODO let user choose his own move
+    firstComb15 = combs15[0];
+
+    //put good combination of card to weak deck
+    weakDeck.push([...firstComb15]);
+
+    //remove used card from good combination
+    firstComb15.splice(firstComb15.indexOf(usedCard), 1);
+
+    cardsRemoved.push([...firstComb15]);
+
+    //remove good combination from board
+    firstComb15.forEach(card => board.splice(board.indexOf(card), 1));
     return "presa con 15";
   } else {
-    //isSuccessfulMove([], [...board.map(card => cardToValue(card))], usedCardValue, combinations);
-    combinations = possibleCombs([usedCard, ...board]);
-    const combsUsedCard = combinations.filter(elm => elm.reduce((acc, val) => (acc += cardToValue(val)), 0) == usedCardValue);
+    // take all the combinations that include the usedCard and of those the ones which sum up to 15
+    allCombinations = possibleCombs([...board]);
+    console.log("all combs", allCombinations);
+    const combsUsedCard = allCombinations.filter(elm => elm.reduce((acc, val) => (acc += cardToValue(val)), 0) == usedCardValue);
     console.log("combsUsedCard", combsUsedCard);
+
     if (combsUsedCard.length > 0) {
-      console.log("combinations: ", combinations);
+      // console.log("combinations: ", combinations);
+      firstComb = combsUsedCard[0];
+      weakDeck.push([...firstComb, usedCard]);
+
+      cardsRemoved.push([...firstComb]);
+
+      firstComb.forEach(card => board.splice(board.indexOf(card), 1));
+
       return "presa normale";
-    } else return "calata";
+    } else {
+      board.push(usedCard);
+      return "calata";
+    }
   }
 };
 

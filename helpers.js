@@ -34,21 +34,19 @@ module.exports.cardToValue = card => {
   return value;
 };
 
-const areThereAces = board => {
-  console.log("inside areThereAces", board);
+module.exports.areThereAces = board => {
   let exit = false;
   board.forEach(card => {
     if (card.charAt(0) == "A") {
-      console.log("found ace ");
+      console.log("found ace in board");
       exit = true;
     }
   });
   return exit;
 };
 
-module.exports.areThereAces = areThereAces;
-
 module.exports.getBoard = deck => {
+  // FIXME doesn't work
   const board = deck.splice(0, 4);
   board
     .filter(card => cardToValue(card) == 1)
