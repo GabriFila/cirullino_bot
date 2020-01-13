@@ -17,6 +17,7 @@ module.exports.composeGroupName = composeGroupName;
 module.exports.cardsToString = cards => cards.toString().replace(/,/gi, "   ");
 
 const cardToValue = card => {
+  // TODO implement object key-value logic instead of switch
   let value;
   card = card.charAt(0);
   switch (card) {
@@ -119,14 +120,14 @@ const elaborateMove = (usedCard, board, strongDeck, weakDeck, cardsRemoved) => {
     board.splice(0, board.length);
     return "scopa";
   }
-
+  // TODO make functions for same scopa
   //check if scopa with total of board equal to used card
   const boardTotal = board.map(card => cardToValue(card)).reduce((acc, val) => acc + val, 0);
 
   if (boardTotal == usedCardValue || boardTotal + usedCardValue == 15) {
     strongDeck.push(usedCard);
-    weakDeck.push([...board]);
     board.forEach(card => weakDeck.push(card));
+    cardsRemoved.push([...board]);
     board.splice(0, board.length);
     return "scopa";
   }
@@ -162,9 +163,7 @@ const elaborateMove = (usedCard, board, strongDeck, weakDeck, cardsRemoved) => {
   } else {
     // take all the combinations that include the usedCard and of those the ones which sum up to 15
     allCombinations = possibleCombs([...board]);
-    console.log("all combs", allCombinations);
     const combsUsedCard = allCombinations.filter(elm => elm.reduce((acc, val) => (acc += cardToValue(val)), 0) == usedCardValue);
-    console.log("combsUsedCard", combsUsedCard);
 
     if (combsUsedCard.length > 0) {
       // console.log("combinations: ", combinations);

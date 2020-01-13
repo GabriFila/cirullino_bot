@@ -6,16 +6,7 @@ const Scene = require("telegraf/scenes/base");
 const { Extra, Markup } = Telegraf;
 //help dependacies
 const fetch = require("node-fetch");
-const {
-  cardsToString,
-  getRandomInt,
-  areThereAces,
-  cardToValue,
-  composeGroupName,
-  possibleCombs,
-  circularNext,
-  elaborateMove
-} = require("./helpers");
+const { cardsToString, getRandomInt, composeGroupName, circularNext, elaborateMove } = require("./helpers");
 
 //firebase dependacies
 const admin = require("firebase-admin");
@@ -38,7 +29,7 @@ sendToUser = (chatId, text, buttons, columns) => {
           .oneTime()
           .resize()
           .extra()
-      : {}
+      : {} //  Markup.removeKeyboard().extra()
   );
 };
 
@@ -72,8 +63,6 @@ const stage = new Stage();
 const getOpponent = new Scene("know-opponent");
 const checkOpponent = new Scene("check-opponent");
 const callOpponent = new Scene("call-opponent");
-
-// ANCHOR bot scenes
 
 getOpponent.enter(ctx => {
   console.info("getting-opponent");
@@ -122,19 +111,19 @@ callOpponent.enter(ctx => {
   bot.telegram
     .sendMessage(ctx.session.opponents[0].chatId, `Sei stato invitato a giocare, se vuoi entare rispondimi /enter`)
     .then(() => {
-      //hasAccepted contains the accepted status of each user in the hypotethical game
-      //of course the start must be set to true
-      //order of hasAccepted is based on
-      const hasAccepted = players.map(player => false);
+      //hasAccepted contains the accepted status of each user in the pending game
+      //order of hasAccepted is alphabetical on usernames
+      const hasAccepted = players.map(_ => false);
+      //of course starter player must be set to true
       hasAccepted[players.findIndex(player => player.username == ctx.message.from.username.toLowerCase())] = true;
+      //create a pending game with state pending and players
       db.collection("pendingGames").add({
         usernames: players.map(player => player.username),
         chatIds: players.map(player => player.chatId),
+        names: players.map(player => player.first_name),
         hasAccepted,
         createdAt: admin.firestore.FieldValue.serverTimestamp()
       });
-      // ctx.scene.enter("create-group");
-      //create a pending game with state pending and players
       ctx.scene.leave();
     })
     .catch(err => {
@@ -150,6 +139,7 @@ bot.command("enter", ctx => {
   const senderUsername = ctx.message.from.username.toLowerCase();
 
   const pendingGameRef = db.collection("pendingGames").where("usernames", "array-contains", `${senderUsername}`);
+
   pendingGameRef.get().then(function(querySnapshot) {
     querySnapshot.forEach(function(pendingGameDbRef) {
       let updatedPlayers = pendingGameDbRef.data();
@@ -186,7 +176,8 @@ bot.command("enter", ctx => {
               1: []
             },
             activeUser: getRandomInt(0, 2),
-            chatIds: updatedPlayers.chatIds
+            chatIds: updatedPlayers.chatIds,
+            names: updatedPlayers.names
           };
           newGroupDbRef
             .collection("groupGames")
@@ -195,22 +186,33 @@ bot.command("enter", ctx => {
               newGroupDbRef.set({ activeGame: gameDbRef }, { merge: true });
               console.info("game-created");
               //start game by making listener on updates on game object and pushing them to all connected users
-              gameDbRef.onSnapshot(doc => {
-                console.info("make-move");
-                const messages = [];
+              const unsubscribe = gameDbRef.onSnapshot(doc => {
                 const game = doc.data();
-                game.chatIds.forEach((chatId, i) => {
-                  messages.push(
-                    `In tavola:   ${cardsToString(game.board)}\nHai:\n  ${game.userStrongDeck[i].length} scope\n  ${
-                      game.userWeakDeck[i].length
-                    } carte nel tuo mazzetto`
-                  );
-                  sendToUser(game.chatIds[i], messages[i]);
-                });
+                const handsLenghts = [];
+
+                for (let [key, value] of Object.entries(game.hands)) handsLenghts.push(value.length);
+
+                if (handsLenghts.every(length => length == 0) && game.deck.length == 0) {
+                  unsubscribe();
+                  console.log("game ended");
+                } else {
+                  console.info("ask-move");
+                  const { activeUser } = game;
+                  let message = `In tavola:   ${cardsToString(game.board)}\n`;
+
+                  game.chatIds.forEach((chatId, i) => {
+                    message += `Hai:\n  ${game.userStrongDeck[i].length} scope\n  ${game.userWeakDeck[i].length} carte nel tuo mazzetto`;
+                    sendToUser(game.chatIds[i], message);
+                    // say to others whose turn it is
+                    if (i == activeUser) sendToUser(game.chatIds[activeUser], "Tocca a te", game.hands[activeUser]);
+                    else sendToUser(game.chatIds[i], `Tocca a ${game.names[activeUser]}`);
+                    //clear messagefor next iteration
+
+                    // FIXME promise logic to order sending message
+                    message = `In tavola:   ${cardsToString(game.board)}\n`;
+                  });
+                }
                 // TODO add logic for multiple promises
-                const { activeUser } = game;
-                // TODO sei to ohter whose turn it is
-                sendToUser(game.chatIds[activeUser], "Tocca a te", game.hands[activeUser]);
               });
             });
         })
@@ -228,19 +230,18 @@ bot.command("refuse", () => {
 bot.hears(/[A0123456789JQK][♥️♦♣♠]/, ctx => {
   // TODO check if user is in game
   //when bot receives a card it checks if the user has an active game, if so it checks if it is the active user, then processes the move e updates the other players
-
   const { text } = ctx.message;
   console.info("reiceved card");
   //user message is a card
   //check if there is an active game
-
   const senderUsername = ctx.message.from.username.toLowerCase();
   db.collection("groups")
     .where("usernames", "array-contains", senderUsername)
+    // TODO select only active group
     .get()
-    .then(docs =>
-      docs.forEach(doc => {
-        doc
+    .then(groups =>
+      groups.forEach(group => {
+        group
           .data()
           .activeGame.get()
           .then(doc => {
@@ -248,9 +249,10 @@ bot.hears(/[A0123456789JQK][♥️♦♣♠]/, ctx => {
             const game = doc.data();
             const { activeUser } = game;
             console.info("validating move");
+
             if (!game.hands[activeUser].includes(ctx.message.text)) ctx.reply(`Hai giocato una carta che non hai in mano`);
             else {
-              game.hands[activeUser].pop(ctx.message.text); //remove used card from player hand
+              game.hands[activeUser].splice(game.hands[activeUser].indexOf(ctx.message.text), 1); //remove used card from player hand
               game.moves.unshift({ user: activeUser, cardPlayed: ctx.message.text }); //start creating game move record
               console.info("analysing move");
               const usedCard = ctx.message.text;
@@ -262,9 +264,7 @@ bot.hears(/[A0123456789JQK][♥️♦♣♠]/, ctx => {
                 game.userWeakDeck[activeUser],
                 cardsRemoved
               );
-
               let messagge = "";
-
               switch (gameResult) {
                 case "scopa":
                   messagge += `fatto scopa con ${usedCard}`;
@@ -277,19 +277,26 @@ bot.hears(/[A0123456789JQK][♥️♦♣♠]/, ctx => {
                   messagge += `calato ${usedCard}`;
                   break;
               }
-
               game.chatIds.forEach((chatId, i) => {
                 if (i != activeUser) sendToUser(chatId, ctx.message.from.first_name + ` ha ` + messagge);
                 else sendToUser(chatId, `Hai ` + messagge);
               });
-
               game.moves[0].type = gameResult;
-
               game.activeUser = circularNext(activeUser, game.chatIds);
-              console.log("weak deck: ", game.userWeakDeck);
+
+              //check if hands are empty
+              const handsLenghts = [];
+
+              for (let [key, value] of Object.entries(game.hands)) handsLenghts.push(value.length);
+
+              if (handsLenghts.every(length => length == 0)) {
+                console.info("empty hands");
+                for (let i = 0; i < Object.keys(game.hands).length; i++) game.hands[i] = game.deck.splice(0, 3);
+              }
+
               doc.ref
                 .set(game)
-                .then(() => console.log("game updated"))
+                .then(() => console.info("game updated"))
                 .catch(err => console.error(err));
             }
           });
@@ -306,7 +313,6 @@ stage.register(callOpponent);
 bot.use(session());
 bot.use(stage.middleware());
 
-// ANCHOR bot commands
 bot.start(ctx => {
   console.info("/start");
   if ("username" in ctx.message.from) {
@@ -360,5 +366,3 @@ bot.command("help", ctx => {
 // ANCHOR hint
 //to have separate buttons in keyboard for cards in hand
 //[["one"], ["two", "three"]]
-// const saluter = new Scene("saluter");
-// saluter.hears(/ciccia/gi,
