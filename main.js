@@ -122,19 +122,19 @@ callOpponent.enter(ctx => {
   bot.telegram
     .sendMessage(ctx.session.opponents[0].chatId, `Sei stato invitato a giocare, se vuoi entare rispondimi /enter`)
     .then(() => {
-      //hasAccepted contains the accepted status of each user in the hypotethical game
-      //of course the start must be set to true
-      //order of hasAccepted is based on
-      const hasAccepted = players.map(player => false);
+      //hasAccepted contains the accepted status of each user in the pending game
+      //order of hasAccepted is alphabetical on usernames
+      const hasAccepted = players.map(_ => false);
+      //of course starter player must be set to true
       hasAccepted[players.findIndex(player => player.username == ctx.message.from.username.toLowerCase())] = true;
+      //create a pending game with state pending and players
       db.collection("pendingGames").add({
         usernames: players.map(player => player.username),
         chatIds: players.map(player => player.chatId),
+        names: players.map(player => player.first_name),
         hasAccepted,
         createdAt: admin.firestore.FieldValue.serverTimestamp()
       });
-      // ctx.scene.enter("create-group");
-      //create a pending game with state pending and players
       ctx.scene.leave();
     })
     .catch(err => {
@@ -150,6 +150,7 @@ bot.command("enter", ctx => {
   const senderUsername = ctx.message.from.username.toLowerCase();
 
   const pendingGameRef = db.collection("pendingGames").where("usernames", "array-contains", `${senderUsername}`);
+
   pendingGameRef.get().then(function(querySnapshot) {
     querySnapshot.forEach(function(pendingGameDbRef) {
       let updatedPlayers = pendingGameDbRef.data();
@@ -186,7 +187,8 @@ bot.command("enter", ctx => {
               1: []
             },
             activeUser: getRandomInt(0, 2),
-            chatIds: updatedPlayers.chatIds
+            chatIds: updatedPlayers.chatIds,
+            names: updatedPlayers.names
           };
           newGroupDbRef
             .collection("groupGames")
@@ -197,20 +199,25 @@ bot.command("enter", ctx => {
               //start game by making listener on updates on game object and pushing them to all connected users
               gameDbRef.onSnapshot(doc => {
                 console.info("make-move");
-                const messages = [];
                 const game = doc.data();
+                const { activeUser } = game;
+                let message = `In tavola:   ${cardsToString(game.board)}\n`;
+                let areHandsEmpty = false;
+                for (let [key, value] of Object.entries(game.hands)) {
+                  if (value.length == 0) {
+                    exit = true;
+                    break;
+                  }
+                }
+                console.log(areHandsEmpty);
                 game.chatIds.forEach((chatId, i) => {
-                  messages.push(
-                    `In tavola:   ${cardsToString(game.board)}\nHai:\n  ${game.userStrongDeck[i].length} scope\n  ${
-                      game.userWeakDeck[i].length
-                    } carte nel tuo mazzetto`
-                  );
-                  sendToUser(game.chatIds[i], messages[i]);
+                  message += `Hai:\n  ${game.userStrongDeck[i].length} scope\n  ${game.userWeakDeck[i].length} carte nel tuo mazzetto`;
+                  sendToUser(game.chatIds[i], message);
+                  // say to others whose turn it is
+                  if (i == activeUser) sendToUser(game.chatIds[activeUser], "Tocca a te", game.hands[activeUser]);
+                  else sendToUser(game.chatIds[i], `Tocca a ${game.names[activeUser]}`);
                 });
                 // TODO add logic for multiple promises
-                const { activeUser } = game;
-                // TODO sei to ohter whose turn it is
-                sendToUser(game.chatIds[activeUser], "Tocca a te", game.hands[activeUser]);
               });
             });
         })
@@ -250,7 +257,7 @@ bot.hears(/[A0123456789JQK][♥️♦♣♠]/, ctx => {
             console.info("validating move");
             if (!game.hands[activeUser].includes(ctx.message.text)) ctx.reply(`Hai giocato una carta che non hai in mano`);
             else {
-              game.hands[activeUser].pop(ctx.message.text); //remove used card from player hand
+              game.hands[activeUser].splice(game.hands[activeUser].indexOf(ctx.message.text), 1); //remove used card from player hand
               game.moves.unshift({ user: activeUser, cardPlayed: ctx.message.text }); //start creating game move record
               console.info("analysing move");
               const usedCard = ctx.message.text;
@@ -286,10 +293,9 @@ bot.hears(/[A0123456789JQK][♥️♦♣♠]/, ctx => {
               game.moves[0].type = gameResult;
 
               game.activeUser = circularNext(activeUser, game.chatIds);
-              console.log("weak deck: ", game.userWeakDeck);
               doc.ref
                 .set(game)
-                .then(() => console.log("game updated"))
+                .then(() => console.info("game updated"))
                 .catch(err => console.error(err));
             }
           });
@@ -360,5 +366,3 @@ bot.command("help", ctx => {
 // ANCHOR hint
 //to have separate buttons in keyboard for cards in hand
 //[["one"], ["two", "three"]]
-// const saluter = new Scene("saluter");
-// saluter.hears(/ciccia/gi,
