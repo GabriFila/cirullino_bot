@@ -17,6 +17,7 @@ module.exports.composeGroupName = composeGroupName;
 module.exports.cardsToString = cards => cards.toString().replace(/,/gi, "   ");
 
 const cardToValue = card => {
+  // TODO implement object key-value logic instead of switch
   let value;
   card = card.charAt(0);
   switch (card) {
