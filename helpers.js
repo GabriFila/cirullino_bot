@@ -184,3 +184,14 @@ const elaborateMove = (usedCard, board, strongDeck, weakDeck, cardsRemoved) => {
 };
 
 module.exports.elaborateMove = elaborateMove;
+
+const calculatePoints = (strongDecks, weakDecks) => {
+  const points = [0, 0];
+
+  // add 'scope' to points
+  for (let [key, value] of Object.entries(strongDecks)) {
+    points[key] += value.length;
+  }
+};
+
+module.exports.calculatePoints = calculatePoints;

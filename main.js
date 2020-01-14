@@ -194,6 +194,9 @@ bot.command("enter", ctx => {
 
                 if (handsLenghts.every(length => length == 0) && game.deck.length == 0) {
                   unsubscribe();
+
+                  // calculate points
+                  // send points to users
                   console.log("game ended");
                 } else {
                   console.info("ask-move");
@@ -293,14 +296,13 @@ bot.hears(/[A0123456789JQK][♥️♦♣♠]/, ctx => {
                 console.info("empty hands");
                 for (let i = 0; i < Object.keys(game.hands).length; i++) game.hands[i] = game.deck.splice(0, 3);
               }
-
+              //update game state
               doc.ref
                 .set(game)
                 .then(() => console.info("game updated"))
                 .catch(err => console.error(err));
             }
           });
-        //update game state
       })
     );
 });
