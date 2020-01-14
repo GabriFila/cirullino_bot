@@ -6,7 +6,7 @@ const Scene = require("telegraf/scenes/base");
 const { Extra, Markup } = Telegraf;
 //help dependacies
 const fetch = require("node-fetch");
-const { cardsToString, getRandomInt, composeGroupName, circularNext, elaborateMove } = require("./helpers");
+const { cardsToString, getRandomInt, composeGroupName, circularNext, elaborateMove, calculatePoints } = require("./helpers");
 
 //firebase dependacies
 const admin = require("firebase-admin");
@@ -29,7 +29,8 @@ sendToUser = (chatId, text, buttons, columns) => {
           .oneTime()
           .resize()
           .extra()
-      : {} //  Markup.removeKeyboard().extra()
+      : // TODO implement logic in order to not send buttons
+        {} //  Markup.removeKeyboard().extra()
   );
 };
 
@@ -194,10 +195,34 @@ bot.command("enter", ctx => {
 
                 if (handsLenghts.every(length => length == 0) && game.deck.length == 0) {
                   unsubscribe();
+                  const results = calculatePoints(game.userStrongDeck, game.userWeakDeck);
+                  console.log("strong", game.userStrongDeck);
+                  console.log("weak", game.userWeakDeck);
+                  console.log(results);
+                  // Hai ottenuto in totale x punti
+                  // mazzo: denari,settebello,carte,primiera
+                  // alta
+                  // piccola fino al x
+
+                  game.chatIds.forEach((chatId, i) =>
+                    sendToUser(
+                      chatId,
+                      `Il gioco è terminato!\nHai ottenuto in totale ${results.points[i]} punti\nDi mazzo: ${
+                        results.whoHasDiamonds == i ? "denari," : ""
+                      } ${results.whoHasCards == i ? "carte," : ""} ${results.whoHasSeven == i ? "sette bello," : ""} ${
+                        results.whoHasPrimiera == i ? "primiera" : ""
+                      }\n${results.whoHasGrande == i ? "grande" : ""}\n${
+                        results.whoHasPiccola == i ? `piccola fino al ${results.piccolaValue}` : ""
+                      }`
+                    )
+                  );
+                  // calculate points
+                  // send points to users
                   console.log("game ended");
                 } else {
                   console.info("ask-move");
                   const { activeUser } = game;
+                  // TODO change messgge if table is empty
                   let message = `In tavola:   ${cardsToString(game.board)}\n`;
 
                   game.chatIds.forEach((chatId, i) => {
@@ -229,6 +254,7 @@ bot.command("refuse", () => {
 
 bot.hears(/[A0123456789JQK][♥️♦♣♠]/, ctx => {
   // TODO check if user is in game
+  // TODO check is user can play, is it in turn
   //when bot receives a card it checks if the user has an active game, if so it checks if it is the active user, then processes the move e updates the other players
   const { text } = ctx.message;
   console.info("reiceved card");
@@ -293,14 +319,14 @@ bot.hears(/[A0123456789JQK][♥️♦♣♠]/, ctx => {
                 console.info("empty hands");
                 for (let i = 0; i < Object.keys(game.hands).length; i++) game.hands[i] = game.deck.splice(0, 3);
               }
-
+              // TODO if last hand place board in last taken
+              //update game state
               doc.ref
                 .set(game)
                 .then(() => console.info("game updated"))
                 .catch(err => console.error(err));
             }
           });
-        //update game state
       })
     );
 });
@@ -347,7 +373,7 @@ bot.start(ctx => {
     );
 });
 
-bot.command("newgame", ctx => {
+bot.command(["newgame", "sfida"], ctx => {
   console.info("/newgame");
   ctx.scene.enter("know-opponent");
 });
