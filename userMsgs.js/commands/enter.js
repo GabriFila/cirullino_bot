@@ -1,18 +1,25 @@
-const admin = require("../firebase");
-const { db } = require("../firebase");
-const { composeGroupName, getRandomInt, cardsToString, sendToUser } = require("../helpers");
+const admin = require("../../firebase");
+const { db } = require("../../firebase");
+//helper
+const { composeGroupName, cardsToString, calculatePoints } = require("../../helpers/game");
+const { sendToUser } = require("../../helpers/common");
+
+//game helpers
+const { buildGame } = require("../../helpers/game");
+
 const enterHandler = ctx => {
   console.info("/enter");
   //check if there is a pending game with the username
   //if there is , it changes the corresponding state of the player and then if all the players are true the game starts
   const senderUsername = ctx.message.from.username.toLowerCase();
-
   const pendingGameRef = db.collection("pendingGames").where("usernames", "array-contains", `${senderUsername}`);
 
-  pendingGameRef.get().then(function(querySnapshot) {
-    querySnapshot.forEach(function(pendingGameDbRef) {
+  pendingGameRef.get().then(querySnapshot => {
+    querySnapshot.forEach(pendingGameDbRef => {
       let updatedPlayers = pendingGameDbRef.data();
+
       updatedPlayers.hasAccepted[pendingGameDbRef.data().usernames.indexOf(senderUsername)] = true;
+
       if (updatedPlayers.hasAccepted.every(elm => elm == true)) pendingGameDbRef.ref.delete();
 
       console.info("creating-group");
@@ -25,29 +32,7 @@ const enterHandler = ctx => {
         .doc("40cards")
         .get()
         .then(deckDbRef => {
-          const shuffledDeck = deckDbRef.data().deck.sort(() => Math.random() - 0.5);
-          const newGame = {
-            deck: shuffledDeck,
-            hands: {
-              0: shuffledDeck.splice(0, 3),
-              1: shuffledDeck.splice(0, 3)
-            },
-            // TODO implement possibility of 'a monte' with 2 aces and sum of cards in board
-            board: shuffledDeck.splice(0, 4),
-            points: 0,
-            moves: [],
-            userStrongDeck: {
-              0: [],
-              1: []
-            },
-            userWeakDeck: {
-              0: [],
-              1: []
-            },
-            activeUser: getRandomInt(0, 2),
-            chatIds: updatedPlayers.chatIds,
-            names: updatedPlayers.names
-          };
+          const newGame = buildGame(deckDbRef.data().deck, updatedPlayers.chatIds, updatedPlayers.names);
           newGroupDbRef
             .collection("groupGames")
             .add({ ...newGame, createdAt: admin.firestore.FieldValue.serverTimestamp() })
@@ -98,18 +83,13 @@ const enterHandler = ctx => {
                   let message = `In tavola:   ${cardsToString(game.board)}\n`;
 
                   game.chatIds.forEach((chatId, i) => {
-                    message += `Hai:\n  ${game.userStrongDeck[i].length} scope\n  ${game.userWeakDeck[i].length} carte nel tuo mazzetto`;
-                    sendToUser(game.chatIds[i], message);
-                    // say to others whose turn it is
-                    if (i == activeUser) sendToUser(game.chatIds[activeUser], "Tocca a te", game.hands[activeUser]);
-                    else sendToUser(game.chatIds[i], `Tocca a ${game.names[activeUser]}`);
-                    //clear messagefor next iteration
-
-                    // FIXME promise logic to order sending message
-                    message = `In tavola:   ${cardsToString(game.board)}\n`;
+                    userMsg = `Hai:\n  scope: ${game.userStrongDeck[i].length}\n  mazzetto: ${game.userWeakDeck[i].length}`;
+                    sendToUser(chatId, message + userMsg).then(_ => {
+                      if (i == activeUser) sendToUser(game.chatIds[activeUser], "Tocca a te", game.hands[activeUser]);
+                      else sendToUser(chatId, `Tocca a ${game.names[activeUser]}`);
+                    });
                   });
                 }
-                // TODO add logic for multiple promises
               });
             });
         })

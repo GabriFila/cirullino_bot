@@ -6,6 +6,7 @@ const callOpponent = new Scene("call-opponent");
 
 callOpponent.enter(ctx => {
   console.info("calling-opponent");
+  // TODO try not to use session
   const { players } = ctx.session;
 
   // TODO check if opponent wants to play

@@ -1,121 +1,86 @@
-const { Markup } = require("telegraf");
-const bot = require("./bot");
-const getRandomInt = (min, max) => {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min)) + min; //Il max è escluso e il min è incluso
-};
-
-module.exports.getRandomInt = getRandomInt;
-
-const composeGroupName = usernames => {
-  let groupName = "";
-  usernames.forEach(user => (groupName += `&${user}`));
-  return groupName.substr(1);
-};
-
-module.exports.composeGroupName = composeGroupName;
-
-module.exports.cardsToString = cards => cards.toString().replace(/,/gi, "   ");
+const { getRandomInt, possibleCombs, indexOfMax } = require("./common");
 
 const cardToValue = card => {
-  // TODO implement object key-value logic instead of switch
-  let value;
-  card = card.charAt(0);
-  switch (card) {
-    case "A":
-      value = 1;
-      break;
-    case "J":
-      value = 8;
-      break;
-    case "Q":
-      value = 9;
-      break;
-    case "K":
-      value = 10;
-      break;
-    default:
-      value = Number(card);
+  let value = card.charAt(0);
+
+  if (isNaN(Number(value))) {
+    const values = {
+      A: 1,
+      J: 8,
+      Q: 9,
+      K: 10
+    };
+    value = values[value];
   }
+
   return value;
 };
 
 module.exports.cardToValue = cardToValue;
 
-const areThereAces = board => {
-  let exit = false;
-  board.forEach(card => {
-    if (card.charAt(0) == "A") {
-      console.log("found ace in board");
-      exit = true;
-    }
-  });
-  return exit;
-};
+const buildGame = (deck, chatIds, names) => {
+  let shuffledDeck = deck.sort(() => Math.random() - 0.5);
 
-module.exports.areThereAces = areThereAces;
-
-const getBoard = deck => {
-  // FIXME doesn't work
-  const board = deck.splice(0, 4);
-  board
-    .filter(card => cardToValue(card) == 1)
-    .forEach((ace, i) => {
-      if (i > 0) {
-        //move ace from board to deck
-        deck.push(board.splice(board.indexOf(ace), 1));
-        let newCard = deck.splice(0, 1);
-        while (cardToValu(newCard) == 1) {
-          deck.push(newCard);
-          newCard = deck.splice(0, 1);
-        }
-        board.push(newCard);
-      } else {
-        console.log("Too many aces in deck");
-      }
-    });
-};
-module.exports.getBoard = getBoard;
-
-const possibleCombs = array => {
-  let fn = function(n, src, got, all) {
-    if (n == 0) {
-      if (got.length > 0) {
-        all[all.length] = got;
-      }
-      return;
-    }
-    for (let j = 0; j < src.length; j++) {
-      fn(n - 1, src.slice(j + 1), got.concat([src[j]]), all);
-    }
-    return;
+  const game = {
+    deck: shuffledDeck,
+    hands: {
+      0: shuffledDeck.splice(0, 3),
+      1: shuffledDeck.splice(0, 3)
+    },
+    // TODO implement possibility of 'a monte' with 2 aces and sum of cards in board
+    board: shuffledDeck.splice(0, 4),
+    points: 0,
+    moves: [],
+    userStrongDeck: {
+      0: [],
+      1: []
+    },
+    userWeakDeck: {
+      0: [],
+      1: []
+    },
+    activeUser: getRandomInt(0, 2),
+    chatIds,
+    names
   };
 
-  let all = [];
+  // resolve 'a monte' issues
+  // if board has 2 or more aces then need to change them with two card inside the deck
 
-  for (let i = 1; i < array.length; i++) {
-    fn(i, array, [], all);
+  //check how many aces are in board
+  let acesInBoard = game.board.filter(card => cardToValue(card) == 1).length;
+
+  if (acesInBoard > 1) {
+    for (let i = 0; i < acesInBoard - 1; i++) {
+      //pick an ace from board and put it into the deck
+      game.deck.push(
+        ...game.board.splice(
+          game.board.findIndex(card => cardToValue(card) == 1),
+          1
+        )
+      );
+      //pick a not ace from deck and place it into the baord
+      game.board.push(
+        ...game.deck.splice(
+          game.deck.findIndex(card => cardToValue(card) != 1),
+          1
+        )
+      );
+    }
   }
 
-  all.push(array);
-
-  return all;
+  return game;
 };
-module.exports.possibleCombs = possibleCombs;
 
-const circularNext = (index, array) => {
-  index++;
-  return index == array.length ? 0 : index;
-};
-module.exports.circularNext = circularNext;
+module.exports.buildGame = buildGame;
 
 const elaborateMove = (usedCard, board, strongDeck, weakDeck, cardsRemoved) => {
   //check if card is ace
   const usedCardValue = cardToValue(usedCard);
 
   //check if scopa with ace
-  if (usedCardValue == 1 && !areThereAces(board)) {
+  if (usedCardValue == 1 && !board.some(card => card.charAt(0) == "A")) {
+    // FIXME problem with scopa
     strongDeck.push(usedCard);
     board.forEach(card => weakDeck.push(card));
     cardsRemoved.push([...board]);
@@ -237,48 +202,17 @@ const calculatePoints = (strongDecks, weakDecks) => {
   whoHasCards = indexOfMax(cards);
   points[whoHasCards]++;
 
-  // console.log("diamonds", diamonds);
-  // console.log("cards", cards);
-  // console.log("piccola", whoHasPiccola);
-  // console.log("piccola value", piccolaValue);
-  // console.log("grande", whoHasGrande);
-  // console.log("sette bello", whoHasSeven);
-  // console.log("primiera", whoHasPrimiera);
   return { points, whoHasCards, whoHasDiamonds, whoHasPiccola, piccolaValue, whoHasGrande, whoHasSeven, whoHasPrimiera };
 };
 
 module.exports.calculatePoints = calculatePoints;
 
-function indexOfMax(arr) {
-  if (arr.length === 0) {
-    return -1;
-  }
-
-  var max = arr[0];
-  var maxIndex = 0;
-
-  for (var i = 1; i < arr.length; i++) {
-    if (arr[i] > max) {
-      maxIndex = i;
-      max = arr[i];
-    }
-  }
-
-  return maxIndex;
-}
-
-const sendToUser = (chatId, text, buttons, columns) => {
-  return bot.telegram.sendMessage(
-    chatId,
-    text,
-    buttons
-      ? Markup.keyboard(buttons, { columns: columns ? columns : buttons.length })
-          .oneTime()
-          .resize()
-          .extra()
-      : // TODO implement logic in order to not send buttons
-        {} //  Markup.removeKeyboard().extra()
-  );
+const composeGroupName = usernames => {
+  let groupName = "";
+  usernames.forEach(user => (groupName += `&${user}`));
+  return groupName.substr(1);
 };
 
-module.exports.sendToUser = sendToUser;
+module.exports.composeGroupName = composeGroupName;
+
+module.exports.cardsToString = cards => cards.toString().replace(/,/gi, "   ");
