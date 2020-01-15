@@ -1,7 +1,7 @@
 const Telegraf = require("telegraf");
 const fetch = require("node-fetch");
 
-const { BOT_TOKEN, ENV } = require("./config");
+const { BOT_TOKEN, ENV, PORT, URL } = require("./config");
 
 const bot = new Telegraf(BOT_TOKEN);
 
