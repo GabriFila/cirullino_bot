@@ -1,3 +1,5 @@
+const { Markup } = require("telegraf");
+const bot = require("./bot");
 const getRandomInt = (min, max) => {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -264,3 +266,19 @@ function indexOfMax(arr) {
 
   return maxIndex;
 }
+
+const sendToUser = (chatId, text, buttons, columns) => {
+  return bot.telegram.sendMessage(
+    chatId,
+    text,
+    buttons
+      ? Markup.keyboard(buttons, { columns: columns ? columns : buttons.length })
+          .oneTime()
+          .resize()
+          .extra()
+      : // TODO implement logic in order to not send buttons
+        {} //  Markup.removeKeyboard().extra()
+  );
+};
+
+module.exports.sendToUser = sendToUser;
