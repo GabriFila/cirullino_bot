@@ -1,24 +1,17 @@
 //telegram dependacies
-const Telegraf = require("telegraf");
 const session = require("telegraf/session");
 const Stage = require("telegraf/stage");
 const Scene = require("telegraf/scenes/base");
-const { Extra, Markup } = Telegraf;
+const { Extra, Markup } = require("telegraf");
 //help dependacies
-const fetch = require("node-fetch");
 const { cardsToString, getRandomInt, composeGroupName, circularNext, elaborateMove, calculatePoints } = require("./helpers");
 
 //firebase dependacies
-const admin = require("firebase-admin");
+const admin = require("./admin");
+const db = admin.firestore();
 
-//configuration
-require("dotenv").config();
-
-const URL = process.env.URL; // get the Heroku config var URL
-const BOT_TOKEN = process.env.BOT_TOKEN; // get Heroku config var BOT_TOKEN
-const PORT = process.env.PORT || 2000; //to start telegram webhook
-
-bot = new Telegraf(BOT_TOKEN);
+// get bot
+bot = require("./bot");
 
 sendToUser = (chatId, text, buttons, columns) => {
   return bot.telegram.sendMessage(
@@ -34,38 +27,15 @@ sendToUser = (chatId, text, buttons, columns) => {
   );
 };
 
-if (process.env.NODE_ENV == "dev") {
-  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/deleteWebhook`)
-    .then(() => {
-      console.info("webhook deleted for dev purpose");
-      bot.startPolling();
-    })
-    .catch(err => console.error(err));
-} else {
-  bot.telegram.setWebhook(`${URL}bot${BOT_TOKEN}`);
-  bot.startWebhook(`/bot${BOT_TOKEN}`, null, PORT);
-}
-
-admin.initializeApp({
-  credential: admin.credential.cert({
-    project_id: process.env.FIREBASE_PROJECT_ID,
-    private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
-    client_email: process.env.FIREBASE_CLIENT_EMAIL
-  }),
-  databaseURL: "https://cirullino-a81df.firebaseio.com"
-});
-
-const db = admin.firestore();
-
 // Create scene manager
 const stage = new Stage();
 
 // Bot scenes creation
-const getOpponent = new Scene("know-opponent");
+const askOpponent = new Scene("ask-opponent");
 const checkOpponent = new Scene("check-opponent");
 const callOpponent = new Scene("call-opponent");
 
-getOpponent.enter(ctx => {
+askOpponent.enter(ctx => {
   console.info("getting-opponent");
   ctx.reply("Chi vuoi sfidare?");
   ctx.scene.enter("check-opponent");
@@ -216,6 +186,10 @@ bot.command("enter", ctx => {
                       }`
                     )
                   );
+                  //update points in db
+                  game.points = results.points;
+                  gameDbRef.set({ game }, { merge: true });
+
                   // calculate points
                   // send points to users
                   console.log("game ended");
@@ -256,7 +230,6 @@ bot.hears(/[A0123456789JQK][♥️♦♣♠]/, ctx => {
   // TODO check if user is in game
   // TODO check is user can play, is it in turn
   //when bot receives a card it checks if the user has an active game, if so it checks if it is the active user, then processes the move e updates the other players
-  const { text } = ctx.message;
   console.info("reiceved card");
   //user message is a card
   //check if there is an active game
@@ -332,7 +305,7 @@ bot.hears(/[A0123456789JQK][♥️♦♣♠]/, ctx => {
 });
 
 //add bot scenes
-stage.register(getOpponent);
+stage.register(askOpponent);
 stage.register(checkOpponent);
 stage.register(callOpponent);
 
@@ -375,13 +348,11 @@ bot.start(ctx => {
 
 bot.command(["newgame", "sfida"], ctx => {
   console.info("/newgame");
-  ctx.scene.enter("know-opponent");
+  ctx.scene.enter("ask-opponent");
 });
 
-bot.command("help", ctx => {
-  console.info("/help");
-  ctx.reply(`Se hai delle necessità su questo bot scrvi una mail a gabriele.filaferro@gmail.com`);
-});
+const helpHandler = require("./commands/help");
+bot.command("help", helpHandler);
 
 //suit emojis
 //♥️
