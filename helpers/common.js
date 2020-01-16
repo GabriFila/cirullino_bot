@@ -1,16 +1,19 @@
-const { Markup } = require("telegraf");
+/* eslint-disable no-plusplus */
+/* eslint-disable no-param-reassign */
+const { Markup } = require('telegraf');
+const bot = require('../bot');
 
 const getRandomInt = (min, max) => {
   min = Math.ceil(min);
   max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min)) + min; //Il max è escluso e il min è incluso
+  return Math.floor(Math.random() * (max - min)) + min; // Il max è escluso e il min è incluso
 };
 
 module.exports.getRandomInt = getRandomInt;
 
 const possibleCombs = array => {
-  let fn = function(n, src, got, all) {
-    if (n == 0) {
+  const fn = (n, src, got, all) => {
+    if (n === 0) {
       if (got.length > 0) {
         all[all.length] = got;
       }
@@ -19,10 +22,9 @@ const possibleCombs = array => {
     for (let j = 0; j < src.length; j++) {
       fn(n - 1, src.slice(j + 1), got.concat([src[j]]), all);
     }
-    return;
   };
 
-  let all = [];
+  const all = [];
 
   for (let i = 1; i < array.length; i++) {
     fn(i, array, [], all);
@@ -39,7 +41,9 @@ const sendToUser = (chatId, text, buttons, columns) =>
     chatId,
     text,
     buttons
-      ? Markup.keyboard(buttons, { columns: columns ? columns : buttons.length })
+      ? Markup.keyboard(buttons, {
+          columns: columns || buttons.length
+        })
           .oneTime()
           .resize()
           .extra()
@@ -51,7 +55,7 @@ module.exports.sendToUser = sendToUser;
 
 const circularNext = (index, array) => {
   index++;
-  return index == array.length ? 0 : index;
+  return index === array.length ? 0 : index;
 };
 module.exports.circularNext = circularNext;
 
@@ -60,10 +64,10 @@ const indexOfMax = arr => {
     return -1;
   }
 
-  var max = arr[0];
-  var maxIndex = 0;
+  let max = arr[0];
+  let maxIndex = 0;
 
-  for (var i = 1; i < arr.length; i++) {
+  for (let i = 1; i < arr.length; i++) {
     if (arr[i] > max) {
       maxIndex = i;
       max = arr[i];
