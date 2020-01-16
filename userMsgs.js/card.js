@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 const { db } = require('../firebase');
-const { circularNext, sendToUser } = require('../helpers/common');
 const { elaborateMove } = require('../helpers/game');
 
 const cardHandler = ctx => {

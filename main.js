@@ -18,7 +18,7 @@ const checkOpponent = require('./scenes/checkOpponent');
 const callOpponent = require('./scenes/callOpponent');
 const showMoves = require('./scenes/showMoves');
 const getMove = require('./scenes/getMove');
-const shareGame = require('./scenes/shareGame');
+const shareMove = require('./scenes/shareMove');
 
 // get bot
 const bot = require('./bot');
@@ -32,7 +32,7 @@ stage.register(checkOpponent);
 stage.register(callOpponent);
 stage.register(showMoves);
 stage.register(getMove);
-stage.register(shareGame);
+stage.register(shareMove);
 
 bot.use(session());
 bot.use(stage.middleware());

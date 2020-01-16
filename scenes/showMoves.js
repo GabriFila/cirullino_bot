@@ -5,11 +5,15 @@ const { feasibleCatches, cardsToString } = require('../helpers/game');
 
 const showMoves = new Scene('show-moves');
 
+// show possible catches to user
 showMoves.enter(ctx => {
   console.log('showing moves');
   const { game, usedCard } = ctx.session;
   const catches = feasibleCatches(game.board, usedCard);
-  if (catches.length === 0) ctx.scene.enter('update-game');
+  if (catches.length === 0) {
+    ctx.session.userCatch = [];
+    ctx.scene.enter('share-move');
+  }
   ctx.reply(
     'Cosa vuoi prendere?',
     Markup.keyboard(catches.map(set => cardsToString(set)))
