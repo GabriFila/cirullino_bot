@@ -1,3 +1,4 @@
 {
-  "cardRegEx": "/[A0123456789JQK][♥️♦♣♠]/"
+  "cardRegEx": "/[A0123456789JQK][♥️♦♣♠]/",
+  "cardRegExGlobal": "/[A0123456789JQK][♥️♦♣♠]/g"
 }

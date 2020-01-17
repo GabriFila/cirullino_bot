@@ -23,7 +23,7 @@ const cardToValue = card => {
 
 module.exports.cardToValue = cardToValue;
 
-const buildGame = (deck, chatIds, names) => {
+const prepGame = (deck, chatIds, names) => {
   const shuffledDeck = deck.sort(() => Math.random() - 0.5);
 
   const game = {
@@ -76,7 +76,7 @@ const buildGame = (deck, chatIds, names) => {
   return game;
 };
 
-module.exports.buildGame = buildGame;
+module.exports.prepGame = prepGame;
 
 const feasibleCatches = (board, usedCard) => {
   const catches = [];
@@ -107,83 +107,6 @@ const feasibleCatches = (board, usedCard) => {
   return catches;
 };
 module.exports.feasibleCatches = feasibleCatches;
-
-const elaborateMove = (usedCard, board, strongDeck, weakDeck, cardsRemoved) => {
-  // check if card is ace
-  const usedCardValue = cardToValue(usedCard);
-
-  // check if scopa with ace
-  if (usedCardValue === 1 && !board.some(card => card.charAt(0) === 'A')) {
-    strongDeck.push(usedCard);
-    board.forEach(card => weakDeck.push(card));
-    cardsRemoved.push([...board]);
-    board.splice(0, board.length);
-    return 'scopa';
-  }
-  // TODO make functions for same scopa
-  // check if scopa with total of board equal to used card
-  const boardTotal = board
-    .map(card => cardToValue(card))
-    .reduce((acc, val) => acc + val, 0);
-
-  if (boardTotal === usedCardValue || boardTotal + usedCardValue === 15) {
-    strongDeck.push(usedCard);
-    board.forEach(card => weakDeck.push(card));
-    cardsRemoved.push([...board]);
-    board.splice(0, board.length);
-    return 'scopa';
-  }
-
-  // check if 'presa da 15'
-
-  // all possible combinations of board
-  let allCombinations = possibleCombs([usedCard, ...board]);
-  // take all the combinations that include the usedCard and of those the ones which sum up to 15
-  const combs15 = allCombinations
-    .filter(comb => comb.includes(usedCard))
-    .filter(
-      elm => elm.reduce((acc, val) => (acc += cardToValue(val)), 0) === 15
-    );
-
-  if (combs15.length > 0) {
-    // there is a 15 combination
-    // pick the first combination
-    // TODO let user choose his own move
-    const [firstComb15] = combs15;
-
-    // put good combination of card to weak deck
-    firstComb15.forEach(card => weakDeck.push(card));
-
-    // remove used card from good combination
-    firstComb15.splice(firstComb15.indexOf(usedCard), 1);
-
-    cardsRemoved.push([...firstComb15]);
-
-    // remove good combination from board
-    firstComb15.forEach(card => board.splice(board.indexOf(card), 1));
-    return 'presa con 15';
-  }
-  // take all the combinations that include the usedCard and of those the ones which sum up to 15
-  allCombinations = possibleCombs([...board]);
-  const combsUsedCard = allCombinations.filter(
-    elm =>
-      elm.reduce((acc, val) => (acc += cardToValue(val)), 0) === usedCardValue
-  );
-
-  if (combsUsedCard.length > 0) {
-    // console.log("combinations: ", combinations);
-    const [firstComb] = combsUsedCard;
-    firstComb.forEach(card => weakDeck.push(card));
-    weakDeck.push(usedCard);
-    cardsRemoved.push([...firstComb]);
-    firstComb.forEach(card => board.splice(board.indexOf(card), 1));
-    return 'presa normale';
-  }
-  board.push(usedCard);
-  return 'calata';
-};
-
-module.exports.elaborateMove = elaborateMove;
 
 const calculatePoints = (strongDecks, weakDecks) => {
   const points = [];
@@ -267,3 +190,30 @@ module.exports.composeGroupName = composeGroupName;
 const cardsToString = cards => cards.toString().replace(/,/gi, '   ');
 
 module.exports.cardsToString = cardsToString;
+
+const myInclude = (arr, elm) => {
+  let answer = false;
+  arr.forEach(card => {
+    if (card == elm) answer = true;
+  });
+  return answer;
+};
+
+const isCatchValid = (target, all) => {
+  let answer = false;
+  all.forEach(poss => {
+    // check if target
+
+    // if (
+    //   poss.filter(card => target.some(trgCard => trgCard === card)).length ===
+    //   target.length
+    // )
+
+    if (poss.filter(card => myInclude(target, card)).length === target.length)
+      answer = true;
+  });
+
+  return answer;
+};
+
+module.exports.isCatchValid = isCatchValid;

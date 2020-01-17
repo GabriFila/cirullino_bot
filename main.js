@@ -15,9 +15,13 @@ const cardHandler = require('./userMsgs.js/card');
 // scenes
 const askOpponent = require('./scenes/askOpponent');
 const checkOpponent = require('./scenes/checkOpponent');
+const activateGroup = require('./scenes/activateGroup');
+const buildGame = require('./scenes/buildGame');
+const startGame = require('./scenes/startGame');
+const endGame = require('./scenes/endGame');
 const callOpponent = require('./scenes/callOpponent');
 const showMoves = require('./scenes/showMoves');
-const getMove = require('./scenes/getMove');
+const checkCatch = require('./scenes/checkCatch');
 const shareMove = require('./scenes/shareMove');
 
 // get bot
@@ -30,8 +34,12 @@ const stage = new Stage();
 stage.register(askOpponent);
 stage.register(checkOpponent);
 stage.register(callOpponent);
+stage.register(activateGroup);
+stage.register(buildGame);
+stage.register(startGame);
+stage.register(endGame);
 stage.register(showMoves);
-stage.register(getMove);
+stage.register(checkCatch);
 stage.register(shareMove);
 
 bot.use(session());
