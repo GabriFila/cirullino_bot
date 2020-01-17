@@ -8,7 +8,6 @@ const callOpponent = new Scene('call-opponent');
 
 callOpponent.enter(ctx => {
   console.info('calling-opponent');
-  // TODO try not to use session
   const { players } = ctx.session;
 
   // TODO check if opponent wants to play
@@ -18,7 +17,7 @@ callOpponent.enter(ctx => {
     player => player.username !== ctx.message.from.username.toLowerCase()
   );
 
-  // TODO add possibility to have multiple opponens -> multiple promises
+  // TODO add possibility to have multiple opponents -> multiple promises
   bot.telegram
     .sendMessage(
       ctx.session.opponents[0].chatId,

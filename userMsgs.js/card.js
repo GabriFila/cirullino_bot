@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 const { db } = require('../firebase');
-const { elaborateMove } = require('../helpers/game');
 
 const cardHandler = ctx => {
   // stage.enter('show-moves');
@@ -13,10 +12,11 @@ const cardHandler = ctx => {
   // check if there is an active game
   const senderUsername = ctx.message.from.username.toLowerCase();
   db.collection('groups')
+    .where('isActive', '==', true)
     .where('usernames', 'array-contains', senderUsername)
-    // TODO select only active group
     .get()
-    .then(groups =>
+    .then(groups => {
+      groups.forEach(group => console.log(group.data()));
       groups.forEach(group => {
         group
           .data()
@@ -51,63 +51,10 @@ const cardHandler = ctx => {
               ctx.session.usedCard = usedCard;
               ctx.session.gameDbRef = doc.ref;
               ctx.scene.enter('show-moves');
-
-              // const gameResult = elaborateMove(
-              //   usedCard,
-              //   game.board,
-              //   game.userStrongDeck[activeUser],
-              //   game.userWeakDeck[activeUser],
-              //   cardsRemoved
-              // );
-              // let messagge = '';
-              // switch (gameResult) {
-              //   case 'scopa':
-              //     messagge += `fatto scopa con ${usedCard}`;
-              //     break;
-              //   case 'presa con 15':
-              //   case 'presa normale':
-              //     messagge += `preso ${cardsRemoved.map(
-              //       card => `${card} `
-              //     )} con ${usedCard}`;
-              //     break;
-              //   case 'calata':
-              //     messagge += `calato ${usedCard}`;
-              //     break;
-              //   default:
-              //     break;
-              // }
-              // game.chatIds.forEach((chatId, i) => {
-              //   if (i !== activeUser)
-              //     sendToUser(
-              //       chatId,
-              //       `${ctx.message.from.first_name} ha ${messagge}`
-              //     );
-              //   else sendToUser(chatId, `Hai ${messagge}`);
-              // });
-              // game.moves[0].type = gameResult;
-              // game.activeUser = circularNext(activeUser, game.chatIds);
-
-              // // check if hands are empty
-              // const handsLenghts = [];
-
-              // for (const [key, value] of Object.entries(game.hands))
-              //   handsLenghts.push(value.length);
-
-              // if (handsLenghts.every(length => length == 0)) {
-              //   console.info('empty hands');
-              //   for (let i = 0; i < Object.keys(game.hands).length; i++)
-              //     game.hands[i] = game.deck.splice(0, 3);
-              // }
-              // // TODO if last hand place board in last taken
-              // // update game state
-              // doc.ref
-              //   .set(game)
-              //   .then(() => console.info('game updated'))
-              //   .catch(err => console.error(err));
             }
           });
-      })
-    );
+      });
+    });
 };
 
 module.exports = cardHandler;
