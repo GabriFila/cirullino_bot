@@ -10,20 +10,22 @@ showMoves.enter(ctx => {
   console.log('showing moves');
   const { game, usedCard } = ctx.session;
   const catches = feasibleCatches(game.board, usedCard);
+  // remove duplicates
   if (catches.length === 0) {
     ctx.session.userCatch = [];
     ctx.scene.enter('share-move');
+  } else {
+    ctx.reply(
+      'Cosa vuoi prendere?',
+      Markup.keyboard(catches.map(set => cardsToString(set)))
+        .oneTime()
+        .resize()
+        .extra()
+    );
+    // pass possible catches to next scene for checking
+    ctx.session.catches = catches;
+    ctx.scene.enter('check-catch');
   }
-  ctx.reply(
-    'Cosa vuoi prendere?',
-    Markup.keyboard(catches.map(set => cardsToString(set)))
-      .oneTime()
-      .resize()
-      .extra()
-  );
-  // pass possible catches to next scene for checking
-  ctx.session.catches = catches;
-  ctx.scene.enter('get-move');
 });
 
 module.exports = showMoves;

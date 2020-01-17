@@ -267,3 +267,30 @@ module.exports.composeGroupName = composeGroupName;
 const cardsToString = cards => cards.toString().replace(/,/gi, '   ');
 
 module.exports.cardsToString = cardsToString;
+
+const myInclude = (arr, elm) => {
+  let answer = false;
+  arr.forEach(card => {
+    if (card == elm) answer = true;
+  });
+  return answer;
+};
+
+const isCatchValid = (target, all) => {
+  let answer = false;
+  all.forEach(poss => {
+    // check if target
+
+    // if (
+    //   poss.filter(card => target.some(trgCard => trgCard === card)).length ===
+    //   target.length
+    // )
+
+    if (poss.filter(card => myInclude(target, card)).length === target.length)
+      answer = true;
+  });
+
+  return answer;
+};
+
+module.exports.isCatchValid = isCatchValid;
