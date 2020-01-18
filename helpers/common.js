@@ -47,8 +47,7 @@ const sendToUser = (chatId, text, buttons, columns) =>
           .oneTime()
           .resize()
           .extra()
-      : // TODO implement logic in order to not send buttons
-        {} //  Markup.removeKeyboard().extra()
+      : Markup.removeKeyboard().extra()
   );
 
 module.exports.sendToUser = sendToUser;

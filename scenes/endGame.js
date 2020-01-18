@@ -10,34 +10,29 @@ endGame.enter(ctx => {
   console.log('game ending');
   const { game, gameDbRef, groupDbRef } = ctx.session;
   const results = calculatePoints(game.userStrongDeck, game.userWeakDeck);
-  console.log('strong', game.userStrongDeck);
-  console.log('weak', game.userWeakDeck);
-  console.log(results);
-  // Hai ottenuto in totale x punti
-  // mazzo: denari,settebello,carte,primiera
-  // alta
-  // piccola fino al x
 
-  game.chatIds.forEach((chatId, i) =>
-    sendToUser(
-      chatId,
-      `Il gioco è terminato!\nHai ottenuto in totale ${
-        results.points[i]
-      } punti\nDi mazzo: ${results.whoHasDiamonds === i ? 'denari,' : ''} ${
-        results.whoHasCards === i ? 'carte,' : ''
-      } ${results.whoHasSeven === i ? 'sette bello,' : ''} ${
-        results.whoHasPrimiera === i ? 'primiera' : ''
-      }\n${results.whoHasGrande === i ? 'grande' : ''}\n${
-        results.whoHasPiccola === i
-          ? `piccola fino al ${results.piccolaValue}`
-          : ''
-      }`
-    )
-  );
+  // send message with points
+  game.chatIds.forEach((chatId, i) => {
+    // compose message with points
+    let message = `Il gioco è terminato!\n`;
+    message += `Hai ottenuto in totale ${results.points[i]} punti\n`;
+    message += `Di mazzo:`;
+    message += ` ${results.whoHasDiamonds === i ? 'denari,' : ''}`;
+    message += ` ${results.whoHasCards === i ? 'carte,' : ''}`;
+    message += ` ${results.whoHasSeven === i ? 'sette bello,' : ''}`;
+    message += ` ${results.whoHasPrimiera === i ? 'primiera' : ''}\n`;
+    message += `${results.whoHasGrande === i ? 'grande' : ''}\n `;
+    message += `${
+      results.whoHasPiccola === i
+        ? `piccola fino al ${results.piccolaValue}`
+        : ''
+    }`;
+    sendToUser(chatId, message);
+  });
   // update points in db
   game.points = results.points;
   gameDbRef.set({ game }, { merge: true });
-  groupDbRef.set({ isActive: false }, { merge: true });
+  groupDbRef.set({ isActive: false, activeGame: null }, { merge: true });
 
   // calculate points
   // send points to users

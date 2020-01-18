@@ -9,12 +9,20 @@ const showMoves = new Scene('show-moves');
 showMoves.enter(ctx => {
   console.log('showing moves');
   const { game, usedCard } = ctx.session;
-  const catches = feasibleCatches(game.board, usedCard);
-  // remove duplicates
+  let catches = feasibleCatches(game.board, usedCard);
+  // remove duplicates caused by 'presa con 15' and 'presa con somma'
+  catches = catches.filter((elm, i) => catches.indexOf(elm) === i);
+
   if (catches.length === 0) {
+    // if length is equal to 0 => 'calata' => no need to check user's choice
     ctx.session.userCatch = [];
     ctx.scene.enter('share-move');
+  } else if (catches.length === 1) {
+    // if length is equal to 1 then there is only one choice, hence no need to check user's choice
+    ctx.session.userCatch = catches;
+    ctx.scene.enter('share-move');
   } else {
+    // ask user right intention
     ctx.reply(
       'Cosa vuoi prendere?',
       Markup.keyboard(catches.map(set => cardsToString(set)))

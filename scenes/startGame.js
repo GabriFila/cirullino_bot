@@ -25,7 +25,7 @@ startGame.enter(ctx => {
         game.board.length === 0
           ? 'Tavola vuota\n'
           : `In tavola:   ${cardsToString(game.board)}\n`;
-
+      // TODO implement bussare
       game.chatIds.forEach((chatId, i) => {
         const userMsg = `Hai:\n  scope: ${game.userStrongDeck[i].length}\n  mazzetto: ${game.userWeakDeck[i].length}`;
         sendToUser(chatId, message + userMsg).then(() => {
