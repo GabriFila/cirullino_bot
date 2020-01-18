@@ -24,6 +24,7 @@ const showMoves = require('./scenes/showMoves');
 const checkCatch = require('./scenes/checkCatch');
 const shareMove = require('./scenes/shareMove');
 
+const { cardRegEx } = require('./helpers/utils.json');
 // get bot
 const bot = require('./bot');
 
@@ -54,9 +55,9 @@ bot.command('help', helpHandler);
 
 bot.command(['newgame', 'sfida'], playHandler);
 
-bot.command('enter', enterHandler);
+bot.command(['enter', 'entra'], enterHandler);
 
-bot.hears(/[A0123456789JQK][♥️♦♣♠]/, cardHandler);
+bot.hears(new RegExp(cardRegEx), cardHandler);
 
 // suit emojis
 // ♥️

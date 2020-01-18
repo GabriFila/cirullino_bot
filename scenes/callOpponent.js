@@ -21,7 +21,7 @@ callOpponent.enter(ctx => {
   bot.telegram
     .sendMessage(
       ctx.session.opponents[0].chatId,
-      `Sei stato invitato a giocare, se vuoi entare rispondimi /enter`
+      `Sei stato invitato a giocare, se vuoi entare rispondimi /entra`
     )
     .then(() => {
       // hasAccepted contains the accepted status of each user in the pending game

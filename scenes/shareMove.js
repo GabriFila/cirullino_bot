@@ -45,13 +45,18 @@ shareMove.enter(ctx => {
   // check if hands are empty
   const handsLenghts = [];
 
-  for (const [key, value] of Object.entries(game.hands))
-    handsLenghts.push(value.length);
+  game.chatIds.forEach((chat, i) => {
+    handsLenghts.push(game.hands[i].length);
+  });
 
   if (handsLenghts.every(length => length === 0)) {
     console.info('empty hands');
     for (let i = 0; i < Object.keys(game.hands).length; i++)
       game.hands[i] = game.deck.splice(0, 3);
+    // TODO inform user of new hand
+    game.chatIds.forEach(chat => {
+      sendToUser(chat, 'Mano terminata, ridiamo le carte!');
+    });
   }
   // update game
   ctx.session.gameDbRef

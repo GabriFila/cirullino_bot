@@ -16,7 +16,6 @@ const cardHandler = ctx => {
     .where('usernames', 'array-contains', senderUsername)
     .get()
     .then(groups => {
-      groups.forEach(group => console.log(group.data()));
       groups.forEach(group => {
         group
           .data()

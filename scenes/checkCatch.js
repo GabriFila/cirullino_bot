@@ -3,15 +3,16 @@
 const Scene = require('telegraf/scenes/base');
 
 const checkCatch = new Scene('check-catch');
+
+const { cardRegEx } = require('../helpers/utils.json');
+
 // const { isCatchValid } = require('../helpers/game');
 
 // take target catch from user and
-checkCatch.hears(/[A0123456789JQK][♥️♦♣♠]/g, ctx => {
+checkCatch.hears(new RegExp(cardRegEx, 'g'), ctx => {
   console.log('checking catch');
-  const userCatch = ctx.message.text.match(/[A0123456789JQK][♥️♦♣♠]/g);
+  const userCatch = ctx.message.text.match(new RegExp(cardRegEx, 'g'));
 
-  console.log(ctx.session.catches);
-  console.log(userCatch);
   ctx.session.userCatch = userCatch;
   ctx.scene.enter('share-move');
 
