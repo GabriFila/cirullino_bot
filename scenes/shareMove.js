@@ -53,7 +53,6 @@ shareMove.enter(ctx => {
     console.info('empty hands');
     for (let i = 0; i < Object.keys(game.hands).length; i++)
       game.hands[i] = game.deck.splice(0, 3);
-    // TODO inform user of new hand
     game.chatIds.forEach(chat => {
       sendToUser(chat, 'Mano terminata, ridiamo le carte!');
     });

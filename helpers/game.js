@@ -28,25 +28,20 @@ const prepGame = (deck, chatIds, names) => {
 
   const game = {
     deck: shuffledDeck,
-    hands: {
-      0: shuffledDeck.splice(0, 3),
-      1: shuffledDeck.splice(0, 3)
-    },
+    hands: {},
     board: shuffledDeck.splice(0, 4),
-    points: 0,
+    points: chatIds.map(() => 0),
     moves: [],
-    userStrongDeck: {
-      0: [],
-      1: []
-    },
-    userWeakDeck: {
-      0: [],
-      1: []
-    },
-    activeUser: getRandomInt(0, 2),
+    userStrongDeck: {},
+    userWeakDeck: {},
+    activeUser: getRandomInt(0, chatIds.length),
     chatIds,
     names
   };
+
+  chatIds.forEach((chat, i) => (game.hands[i] = shuffledDeck.splice(0, 3)));
+  chatIds.forEach((chat, i) => (game.userStrongDeck[i] = []));
+  chatIds.forEach((chat, i) => (game.userWeakDeck[i] = []));
 
   // solve 'a monte' issues
   // if board has 2 or more aces then need to change them with two card inside the deck
@@ -71,6 +66,23 @@ const prepGame = (deck, chatIds, names) => {
         )
       );
     }
+  }
+  // TODO solve a monte with 3 same card in board
+  const sortedBoard = game.board.sort();
+  if (
+    cardToValue(sortedBoard[0]) === cardToValue(sortedBoard[1]) &&
+    cardToValue(sortedBoard[0]) === cardToValue(sortedBoard[2])
+  ) {
+    // if 3 equal cards
+    // move of three equal cards from deck
+    game.deck.push(...game.board.splice(0, 1));
+    // take one diffferent card from deck in board
+    game.board.push(
+      ...game.deck.splice(
+        game.deck.findIndex(card => cardToValue(card) !== 1),
+        1
+      )
+    );
   }
 
   return game;
@@ -108,6 +120,12 @@ const feasibleCatches = (board, usedCard) => {
 };
 module.exports.feasibleCatches = feasibleCatches;
 
+const isThereMoreThanOneMax = arr => {
+  const sortedArr = arr.sort();
+  if (sortedArr[0] === sortedArr[1]) return true;
+  return false;
+};
+
 const calculatePoints = (strongDecks, weakDecks) => {
   const points = [];
   const diamonds = [];
@@ -120,53 +138,57 @@ const calculatePoints = (strongDecks, weakDecks) => {
   let whoHasGrande = -1; // if someone hasthen it is the player index
   let whoHasSeven = -1; // if someone hasthen it is the player index
   // add 'scope' to points
-  for (const [key, value] of Object.entries(strongDecks)) {
-    points.push(value.length);
+
+  for (let i = 0; i < Object.keys(strongDecks).length; i++) {
+    // add scope to points
+    points.push(strongDecks[i].length);
     // then pass strong cards into weak
-    weakDecks[key].push(...strongDecks[key]);
+    weakDecks[i].push(...strongDecks[i]);
     // count denari
     diamonds.push(
-      weakDecks[key].filter(card => card.charAt(1) === '\u2666').length
+      weakDecks[i].filter(card => card.charAt(1) === '\u2666').length
     );
     // count cards
-    cards.push(weakDecks[key].length);
+    cards.push(weakDecks[i].length);
     // TODO keep going on primiera
-    if (weakDecks[key].filter(card => card.charAt(0) === 7).length === 3) {
-      whoHasPrimiera = Number(key);
+    if (weakDecks[i].filter(card => card.charAt(0) === 7).length === 3) {
+      whoHasPrimiera = Number(i);
     }
     // calc piccola
     if (
-      weakDecks[key].includes('A♦️') &&
-      weakDecks[key].includes('2♦️') &&
-      weakDecks[key].includes('3♦️')
+      weakDecks[i].includes('A♦️') &&
+      weakDecks[i].includes('2♦️') &&
+      weakDecks[i].includes('3♦️')
     ) {
-      whoHasPiccola = Number(key);
-      for (let i = 0; i < 3; i++) {
-        if (weakDecks[key].includes(`${i + 4}♦️`)) piccolaValue = i + 1;
+      whoHasPiccola = Number(i);
+      for (let j = 0; j < 3; j++) {
+        if (weakDecks[i].includes(`${i + 4}♦️`)) piccolaValue = i + 1;
         else break;
       }
+
       piccolaValue += 3;
-      points[key] += piccolaValue;
+      points[i] += piccolaValue;
     }
     // calc grande
     if (
-      weakDecks[key].includes('K♦️') &&
-      weakDecks[key].includes('Q♦️') &&
-      weakDecks[key].includes('J♦️')
+      weakDecks[i].includes('K♦️') &&
+      weakDecks[i].includes('Q♦️') &&
+      weakDecks[i].includes('J♦️')
     ) {
-      whoHasGrande = Number(key);
-      points[key] += 5;
+      whoHasGrande = Number(i);
+      points[i] += 5;
     }
     // calc settebello
-    if (weakDecks[key].includes('7\u2666')) {
-      whoHasSeven = Number(key);
-      points[key]++;
+    if (weakDecks[i].includes('7\u2666')) {
+      whoHasSeven = Number(i);
+      points[i]++;
     }
   }
-  // TODO check equality case in denari and carte
-  whoHasDiamonds = indexOfMax(diamonds);
+
+  // check which user has 'carte' and 'denari'
+  if (!isThereMoreThanOneMax(diamonds)) whoHasDiamonds = indexOfMax(diamonds);
+  if (!isThereMoreThanOneMax(cards)) whoHasCards = indexOfMax(cards);
   points[whoHasDiamonds]++;
-  whoHasCards = indexOfMax(cards);
   points[whoHasCards]++;
   return {
     points,
