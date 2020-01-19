@@ -12,8 +12,9 @@ const refuseHandler = require('./userMsgs.js/refuse');
 // user msg handlers
 const cardHandler = require('./userMsgs.js/card');
 
+// TODO map card to integer
+
 // scenes
-const askOpponent = require('./scenes/askOpponent');
 const checkOpponent = require('./scenes/checkOpponent');
 const activateGroup = require('./scenes/activateGroup');
 const buildGame = require('./scenes/buildGame');
@@ -32,7 +33,6 @@ const bot = require('./bot');
 const stage = new Stage();
 
 // add bot scenes
-stage.register(askOpponent);
 stage.register(checkOpponent);
 stage.register(callOpponent);
 stage.register(activateGroup);

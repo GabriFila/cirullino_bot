@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 const Scene = require('telegraf/scenes/base');
 const { sendToUser } = require('../helpers/common');
-const { cardsToString } = require('../helpers/game');
+const { cardsToString } = require('../helpers/gameHelpers');
 
 const startGame = new Scene('start-game');
 

@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 const Scene = require('telegraf/scenes/base');
 const { Markup } = require('telegraf');
-const { feasibleCatches, cardsToString } = require('../helpers/game');
+const { feasibleCatches, cardsToString } = require('../helpers/gameHelpers');
 
 const showMoves = new Scene('show-moves');
 
