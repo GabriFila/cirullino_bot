@@ -12,6 +12,8 @@ const refuseHandler = require('./userMsgs.js/refuse');
 // user msg handlers
 const cardHandler = require('./userMsgs.js/card');
 
+// TODO map card to integer
+
 // scenes
 const checkOpponent = require('./scenes/checkOpponent');
 const activateGroup = require('./scenes/activateGroup');
