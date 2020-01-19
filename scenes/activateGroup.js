@@ -3,7 +3,7 @@ const Scene = require('telegraf/scenes/base');
 const { db } = require('../firebase');
 
 const activateGroup = new Scene('activate-group');
-const { composeGroupName } = require('../helpers/game');
+const { composeGroupName } = require('../helpers/gameHelpers');
 
 activateGroup.enter(ctx => {
   console.info('activating group');

@@ -67,7 +67,6 @@ const prepGame = (deck, chatIds, names) => {
       );
     }
   }
-  // TODO solve a monte with 3 same card in board
   const sortedBoard = game.board.sort();
   if (
     cardToValue(sortedBoard[0]) === cardToValue(sortedBoard[1]) &&
@@ -203,39 +202,14 @@ const calculatePoints = (strongDecks, weakDecks) => {
 };
 module.exports.calculatePoints = calculatePoints;
 
+// FIXME fix groupnames sorting
 const composeGroupName = usernames => {
   let groupName = '';
   usernames.forEach(user => (groupName += `&${user}`));
   return groupName.substr(1);
 };
 module.exports.composeGroupName = composeGroupName;
+
 const cardsToString = cards => cards.toString().replace(/,/gi, '   ');
 
 module.exports.cardsToString = cardsToString;
-
-const myInclude = (arr, elm) => {
-  let answer = false;
-  arr.forEach(card => {
-    if (card == elm) answer = true;
-  });
-  return answer;
-};
-
-const isCatchValid = (target, all) => {
-  let answer = false;
-  all.forEach(poss => {
-    // check if target
-
-    // if (
-    //   poss.filter(card => target.some(trgCard => trgCard === card)).length ===
-    //   target.length
-    // )
-
-    if (poss.filter(card => myInclude(target, card)).length === target.length)
-      answer = true;
-  });
-
-  return answer;
-};
-
-module.exports.isCatchValid = isCatchValid;

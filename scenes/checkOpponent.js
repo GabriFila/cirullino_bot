@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const Scene = require('telegraf/scenes/base');
 const { Extra } = require('telegraf');
 const { db } = require('../firebase');

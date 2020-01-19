@@ -10,7 +10,6 @@ callOpponent.enter(ctx => {
   console.info('calling-opponent');
   const { players } = ctx.session;
 
-  // TODO check if opponent wants to play
   ctx.reply(`Contatto il tuo avversario`);
 
   ctx.session.opponents = players.filter(

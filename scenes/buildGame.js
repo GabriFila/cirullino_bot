@@ -3,7 +3,7 @@ const Scene = require('telegraf/scenes/base');
 
 const { db } = require('../firebase');
 const admin = require('../firebase');
-const { prepGame } = require('../helpers/game');
+const { prepGame } = require('../helpers/gameHelpers');
 
 const buildGame = new Scene('build-game');
 
