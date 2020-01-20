@@ -8,9 +8,9 @@ const showCatches = new Scene('show-catches');
 
 // show possible catches to user
 showCatches.enter(ctx => {
-  console.log('showing catches');
-  const { game, usedCard } = ctx.session;
-  let catches = feasibleCatches(game.board, usedCard);
+  console.log('showing catches'.green);
+  const { game, usedNum } = ctx.session;
+  let catches = feasibleCatches(game.board, usedNum);
   // remove duplicates caused by 'presa con 15' and 'presa con somma'
   catches = catches.filter((elm, i) => catches.indexOf(elm) === i);
 
@@ -20,7 +20,7 @@ showCatches.enter(ctx => {
     ctx.scene.enter('share-move');
   } else if (catches.length === 1) {
     // if length is equal to 1 then there is only one choice, hence no need to check user's choice
-    ctx.session.userCatch = catches;
+    [ctx.session.userCatch] = catches;
     ctx.scene.enter('share-move');
   } else {
     // ask user right intention

@@ -26,14 +26,14 @@ const cardHandler = ctx => {
               if (game.chatIds[activeUser] === ctx.message.chat.id) {
                 console.info('validating hand'.green);
                 // check if user has used card in own hand
-                const usedCard = cardToNum(ctx.message.text);
+                const usedNum = cardToNum(ctx.message.text);
 
-                if (!game.hands[activeUser].includes(usedCard))
+                if (!game.hands[activeUser].includes(usedNum))
                   ctx.reply(`⚠️Hai giocato una carta che non hai in mano!`);
                 else {
                   // remove used card from user's hand
                   game.hands[activeUser].splice(
-                    game.hands[activeUser].indexOf(usedCard),
+                    game.hands[activeUser].indexOf(usedNum),
                     1
                   ); // create new move record
                   game.moves.unshift({
@@ -42,7 +42,7 @@ const cardHandler = ctx => {
                   });
                   // pass to evaluate and show possible catches with chosen card
                   ctx.session.game = game;
-                  ctx.session.usedCard = usedCard;
+                  ctx.session.usedNum = usedNum;
                   ctx.session.gameDbRef = doc.ref;
                   ctx.scene.enter('show-catches');
                   console.log('turn ok');

@@ -11,12 +11,14 @@ const numToCard = num => {
   if (value === 'K') {
     suit--;
   }
-  const suits = {
-    0: '\u2665',
-    1: '\u2666',
-    2: '\u2663',
-    3: '\u2660'
-  };
+  // const suits = {
+  //   0: '\u2665',
+  //   1: '\u2666',
+  //   2: '\u2663',
+  //   3: '\u2660'
+  // };
+
+  const suits = ['\u2665', '\u2666', '\u2663', '\u2660'];
 
   suit = suits[suit];
 
