@@ -1,7 +1,9 @@
+/* eslint-disable no-plusplus */
 /* eslint-disable no-console */
 const Scene = require('telegraf/scenes/base');
 const { sendToUser } = require('../helpers/common');
-const { cardsToString } = require('../helpers/gameHelpers');
+const numsToString = require('../helpers/game/numsToString');
+const numToCard = require('../helpers/game/numToCard');
 
 const startGame = new Scene('start-game');
 
@@ -11,8 +13,11 @@ startGame.enter(ctx => {
     const game = doc.data();
     const handsLenghts = [];
 
-    for (const [key, value] of Object.entries(game.hands))
-      handsLenghts.push(value.length);
+    // for (const [key, value] of Object.entries(game.hands))
+    //   handsLenghts.push(value.length);
+
+    for (let i = 0; i < Object.keys(game.hands).length; i++)
+      handsLenghts.push(game.hands[i].length);
 
     if (handsLenghts.every(length => length === 0) && game.deck.length === 0) {
       unsubscribe();
@@ -24,7 +29,7 @@ startGame.enter(ctx => {
       const message =
         game.board.length === 0
           ? 'Tavola vuota\n'
-          : `In tavola:   ${cardsToString(game.board)}\n`;
+          : `In tavola:   ${numsToString(game.board)}\n`;
       // TODO implement bussare
       game.chatIds.forEach((chatId, i) => {
         const userMsg = `Hai:\n  scope: ${game.userStrongDeck[i].length}\n  mazzetto: ${game.userWeakDeck[i].length}`;
@@ -33,7 +38,7 @@ startGame.enter(ctx => {
             sendToUser(
               game.chatIds[activeUser],
               'Tocca a te',
-              game.hands[activeUser]
+              game.hands[activeUser].map(num => numToCard(num))
             );
           else sendToUser(chatId, `Tocca a ${game.names[activeUser]}`);
         });

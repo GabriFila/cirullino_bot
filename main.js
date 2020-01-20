@@ -1,3 +1,5 @@
+require('colors');
+
 // telegraf dependacies
 const session = require('telegraf/session');
 const Stage = require('telegraf/stage');
@@ -21,7 +23,7 @@ const buildGame = require('./scenes/buildGame');
 const startGame = require('./scenes/startGame');
 const endGame = require('./scenes/endGame');
 const callOpponent = require('./scenes/callOpponent');
-const showMoves = require('./scenes/showMoves');
+const showCatches = require('./scenes/showCatches');
 const checkCatch = require('./scenes/checkCatch');
 const shareMove = require('./scenes/shareMove');
 
@@ -39,7 +41,7 @@ stage.register(activateGroup);
 stage.register(buildGame);
 stage.register(startGame);
 stage.register(endGame);
-stage.register(showMoves);
+stage.register(showCatches);
 stage.register(checkCatch);
 stage.register(shareMove);
 
@@ -56,6 +58,9 @@ bot.command('help', helpHandler);
 bot.command(['newgame', 'sfida'], playHandler);
 
 bot.command(['enter', 'entra'], enterHandler);
+
+// TODO implement privacy info response
+bot.command('privacy', enterHandler);
 
 bot.hears(new RegExp(cardRegEx), cardHandler);
 

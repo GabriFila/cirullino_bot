@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 const { db } = require('../firebase');
+const cardToNum = require('../helpers/game/cardToNum');
 
 const cardHandler = ctx => {
   // stage.enter('show-moves');
@@ -23,25 +24,27 @@ const cardHandler = ctx => {
               const game = doc.data();
               const { activeUser } = game;
               if (game.chatIds[activeUser] === ctx.message.chat.id) {
-                console.info('validating hand');
+                console.info('validating hand'.green);
+                // check if user has used card in own hand
+                const usedNum = cardToNum(ctx.message.text);
 
-                if (!game.hands[activeUser].includes(ctx.message.text))
+                if (!game.hands[activeUser].includes(usedNum))
                   ctx.reply(`⚠️Hai giocato una carta che non hai in mano!`);
                 else {
+                  // remove used card from user's hand
                   game.hands[activeUser].splice(
-                    game.hands[activeUser].indexOf(ctx.message.text),
+                    game.hands[activeUser].indexOf(usedNum),
                     1
-                  ); // remove used card from player hand
+                  ); // create new move record
                   game.moves.unshift({
                     user: activeUser,
                     cardPlayed: ctx.message.text
-                  }); // start creating game move record
-                  const usedCard = ctx.message.text;
-                  // pass to evaluate and show possible moves with chosen card
+                  });
+                  // pass to evaluate and show possible catches with chosen card
                   ctx.session.game = game;
-                  ctx.session.usedCard = usedCard;
+                  ctx.session.usedNum = usedNum;
                   ctx.session.gameDbRef = doc.ref;
-                  ctx.scene.enter('show-moves');
+                  ctx.scene.enter('show-catches');
                   console.log('turn ok');
                 }
               } else {
@@ -53,7 +56,7 @@ const cardHandler = ctx => {
               );
             }
           })
-          .catch(err => console.log(err));
+          .catch(err => console.log(err.red));
       });
     });
 };

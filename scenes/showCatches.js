@@ -1,15 +1,16 @@
 /* eslint-disable no-console */
 const Scene = require('telegraf/scenes/base');
 const { Markup } = require('telegraf');
-const { feasibleCatches, cardsToString } = require('../helpers/gameHelpers');
+const feasibleCatches = require('../helpers/game/feasibleCatches');
+const numsToString = require('../helpers/game/numsToString');
 
-const showMoves = new Scene('show-moves');
+const showCatches = new Scene('show-catches');
 
 // show possible catches to user
-showMoves.enter(ctx => {
-  console.log('showing moves');
-  const { game, usedCard } = ctx.session;
-  let catches = feasibleCatches(game.board, usedCard);
+showCatches.enter(ctx => {
+  console.log('showing catches'.green);
+  const { game, usedNum } = ctx.session;
+  let catches = feasibleCatches(game.board, usedNum);
   // remove duplicates caused by 'presa con 15' and 'presa con somma'
   catches = catches.filter((elm, i) => catches.indexOf(elm) === i);
 
@@ -19,13 +20,13 @@ showMoves.enter(ctx => {
     ctx.scene.enter('share-move');
   } else if (catches.length === 1) {
     // if length is equal to 1 then there is only one choice, hence no need to check user's choice
-    ctx.session.userCatch = catches;
+    [ctx.session.userCatch] = catches;
     ctx.scene.enter('share-move');
   } else {
     // ask user right intention
     ctx.reply(
       'Cosa vuoi prendere?',
-      Markup.keyboard(catches.map(set => cardsToString(set)))
+      Markup.keyboard(catches.map(set => numsToString(set)))
         .oneTime()
         .resize()
         .extra()
@@ -36,4 +37,4 @@ showMoves.enter(ctx => {
   }
 });
 
-module.exports = showMoves;
+module.exports = showCatches;

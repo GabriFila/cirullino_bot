@@ -1,6 +1,7 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable no-console */
 const Scene = require('telegraf/scenes/base');
+const cardToNum = require('../helpers/game/cardToNum');
 
 const checkCatch = new Scene('check-catch');
 
@@ -13,7 +14,7 @@ checkCatch.hears(new RegExp(cardRegEx, 'g'), ctx => {
   console.log('checking catch');
   const userCatch = ctx.message.text.match(new RegExp(cardRegEx, 'g'));
 
-  ctx.session.userCatch = userCatch;
+  ctx.session.userCatch = userCatch.map(card => cardToNum(card));
   ctx.scene.enter('share-move');
 
   // FIXME it doesn't work when make scopa

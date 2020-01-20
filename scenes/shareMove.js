@@ -2,24 +2,25 @@
 /* eslint-disable no-console */
 const Scene = require('telegraf/scenes/base');
 const { circularNext, sendToUser } = require('../helpers/common');
-const { cardsToString } = require('../helpers/gameHelpers');
+const numToCard = require('../helpers/game/numToCard');
+const numsToString = require('../helpers/game/numsToString');
 
 const shareMove = new Scene('share-move');
 // share move to other users
 shareMove.enter(ctx => {
   console.log('sharing move');
-  const { userCatch, usedCard, game } = ctx.session;
+  const { userCatch, usedNum, game } = ctx.session;
   let message = '';
   // check if calta
   const { activeUser } = game;
+  const usedCard = numToCard(usedNum);
   if (userCatch.length === 0) {
     message = `calato ${usedCard}`;
-    game.board.push(usedCard);
+    game.board.push(usedNum);
     game.moves[0].type = 'calata';
   } else {
     // move card from board to weak deck
     userCatch.forEach(card => {
-      console.log(card.length);
       game.userWeakDeck[activeUser].push(
         ...game.board.splice(game.board.indexOf(card), 1)
       );
@@ -29,12 +30,12 @@ shareMove.enter(ctx => {
       game.moves[0].type = 'scopa';
       message = `fatto scopa con ${usedCard}`;
       // if scopa add used card to strongdeck else to weakDeck
-      game.userStrongDeck[activeUser].push(ctx.session.usedCard);
+      game.userStrongDeck[activeUser].push(ctx.session.usedNum);
     } else {
       // not scopa
       game.moves[0].type = 'presa';
-      message = `preso ${cardsToString(userCatch)} con ${usedCard}`;
-      game.userWeakDeck[activeUser].push(ctx.session.usedCard);
+      message = `preso ${numsToString(userCatch)} con ${usedCard}`;
+      game.userWeakDeck[activeUser].push(ctx.session.usedNum);
     }
   }
   Promise.all(
@@ -47,6 +48,8 @@ shareMove.enter(ctx => {
       return sendToUser(chatId, `Hai ${message}`);
     })
   ).then(() => {
+    // change activeUser
+
     game.activeUser = circularNext(activeUser, game.chatIds);
 
     // check if hands are empty
@@ -66,27 +69,28 @@ shareMove.enter(ctx => {
           // TODO tell how many more hands are left
           sendToUser(chat, 'Mano terminata, ridiamo le carte!');
         });
-      } else {
-        // last hand
-        // if so check who made the last move different from 'calata'
-        const lastMoveType = game.move[0].type;
-        if (lastMoveType === 'scopa') {
-          // move strongCard to weak deck and inform users
-          game.userWeakDeck[activeUser].push(
-            ...game.userStrongDeck[activeUser].splice(
-              game.userStrongDeck.length - 1,
-              1
-            )
-          );
-        } else if (lastMoveType === 'presa') {
-          game.userWeakDeck[activeUser].push(...game.board);
-        } else {
-          const lastUserNoCalata = game.moves.find(
-            move => move.type !== 'calata'
-          ).user;
-          game.userWeakDeck[lastUserNoCalata].push(...game.board);
-        }
       }
+      // else {
+      //   // last hand
+      //   // if so check who made the last move different from 'calata'
+      //   const lastMoveType = game.move[0].type;
+      //   if (lastMoveType === 'scopa') {
+      //     // move strongCard to weak deck and inform users
+      //     game.userWeakDeck[activeUser].push(
+      //       ...game.userStrongDeck[activeUser].splice(
+      //         game.userStrongDeck.length - 1,
+      //         1
+      //       )
+      //     );
+      //   } else if (lastMoveType === 'presa') {
+      //     game.userWeakDeck[activeUser].push(...game.board);
+      //   } else {
+      //     const lastUserNoCalata = game.moves.find(
+      //       move => move.type !== 'calata'
+      //     ).user;
+      //     game.userWeakDeck[lastUserNoCalata].push(...game.board);
+      //   }
+      // }
     }
 
     // TODO implement last move
@@ -98,8 +102,6 @@ shareMove.enter(ctx => {
       .then(() => console.info('game updated'))
       .catch(err => console.error(err));
   });
-
-  // change activeUser
 });
 
 module.exports = shareMove;
