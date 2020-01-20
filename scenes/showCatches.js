@@ -1,13 +1,14 @@
 /* eslint-disable no-console */
 const Scene = require('telegraf/scenes/base');
 const { Markup } = require('telegraf');
-const { feasibleCatches, cardsToString } = require('../helpers/gameHelpers');
+const feasibleCatches = require('../helpers/game/feasibleCatches');
+const numsToString = require('../helpers/game/numsToString');
 
-const showMoves = new Scene('show-moves');
+const showCatches = new Scene('show-catches');
 
 // show possible catches to user
-showMoves.enter(ctx => {
-  console.log('showing moves');
+showCatches.enter(ctx => {
+  console.log('showing catches');
   const { game, usedCard } = ctx.session;
   let catches = feasibleCatches(game.board, usedCard);
   // remove duplicates caused by 'presa con 15' and 'presa con somma'
@@ -25,7 +26,7 @@ showMoves.enter(ctx => {
     // ask user right intention
     ctx.reply(
       'Cosa vuoi prendere?',
-      Markup.keyboard(catches.map(set => cardsToString(set)))
+      Markup.keyboard(catches.map(set => numsToString(set)))
         .oneTime()
         .resize()
         .extra()
@@ -36,4 +37,4 @@ showMoves.enter(ctx => {
   }
 });
 
-module.exports = showMoves;
+module.exports = showCatches;
