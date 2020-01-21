@@ -79,8 +79,3 @@ const calculatePoints = (strongDecks, weakDecks) => {
   };
 };
 module.exports = calculatePoints;
-
-const strongs = { 0: [11, 12, 13], 1: [20] };
-const weaks = { 0: [15, 16, 14], 1: [18, 19] };
-
-console.log(calculatePoints(strongs, weaks));

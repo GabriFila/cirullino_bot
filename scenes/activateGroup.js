@@ -3,13 +3,13 @@ const Scene = require('telegraf/scenes/base');
 const { db } = require('../firebase');
 
 const activateGroup = new Scene('activate-group');
-const { composeGroupName } = require('../helpers/gameHelpers');
+const getGroupName = require('../helpers/general/getGroupName');
 
 activateGroup.enter(ctx => {
   console.info('activating group');
   const { usernames } = ctx.session.updatedPlayers;
   db.collection('groups')
-    .doc(composeGroupName(usernames))
+    .doc(getGroupName(usernames))
     .get()
     .then(async group => {
       if (!group.exists) {

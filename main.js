@@ -17,15 +17,21 @@ const cardHandler = require('./userMsgs.js/card');
 // TODO map card to integer
 
 // scenes
-const checkOpponent = require('./scenes/checkOpponent');
+
+const countOpponents = require('./scenes/countOpponents');
+const checkOpponents = require('./scenes/checkOpponent');
+const callOpponents = require('./scenes/callOpponents');
+
 const activateGroup = require('./scenes/activateGroup');
+
 const buildGame = require('./scenes/buildGame');
 const startGame = require('./scenes/startGame');
-const endGame = require('./scenes/endGame');
-const callOpponent = require('./scenes/callOpponent');
+
 const showCatches = require('./scenes/showCatches');
 const checkCatch = require('./scenes/checkCatch');
 const shareMove = require('./scenes/shareMove');
+
+const endGame = require('./scenes/endGame');
 
 const { cardRegEx } = require('./helpers/utils.json');
 // get bot
@@ -35,8 +41,9 @@ const bot = require('./bot');
 const stage = new Stage();
 
 // add bot scenes
-stage.register(checkOpponent);
-stage.register(callOpponent);
+stage.register(countOpponents);
+stage.register(checkOpponents);
+stage.register(callOpponents);
 stage.register(activateGroup);
 stage.register(buildGame);
 stage.register(startGame);

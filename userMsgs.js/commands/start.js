@@ -15,7 +15,7 @@ const startHandler = ctx => {
         if (!doc.exists) {
           newUserRef.set({
             chatId: ctx.message.chat.id,
-            first_name: ctx.message.chat.first_name,
+            name: ctx.message.chat.first_name,
             wins: 0,
             losses: 0
           });
@@ -23,7 +23,7 @@ const startHandler = ctx => {
           newUserRef.set(
             {
               chatId: ctx.message.chat.id,
-              first_name: ctx.message.chat.first_name
+              name: ctx.message.chat.first_name
             },
             { merge: true }
           );

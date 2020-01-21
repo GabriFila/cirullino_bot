@@ -1,7 +1,8 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable no-console */
 const Scene = require('telegraf/scenes/base');
-const { circularNext, sendToUser } = require('../helpers/common');
+const { circularNext } = require('../helpers/common');
+const sendToUser = require('../helpers/general/sendToUser');
 const numToCard = require('../helpers/game/numToCard');
 const numsToString = require('../helpers/game/numsToString');
 
