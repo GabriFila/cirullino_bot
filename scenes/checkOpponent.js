@@ -2,6 +2,7 @@
 const Scene = require('telegraf/scenes/base');
 const { Extra } = require('telegraf');
 const { db } = require('../firebase');
+const parseUsername = require('../helpers/general/parseUsername');
 
 const checkOpponent = new Scene('check-opponent');
 // TODO support asking of more then 1 opponent
@@ -9,9 +10,8 @@ checkOpponent.on('text', ctx => {
   console.info('checking-opponent');
   ctx.reply('Ricevuto! Controllo...');
   // TODO remove possible @ from username
-  const opponentRef = db
-    .collection('users')
-    .doc(`${ctx.message.text.toLowerCase()}`);
+  const opponentUsername = parseUsername(ctx.message.text);
+  const opponentRef = db.collection('users').doc(opponentUsername);
   opponentRef
     .get()
     .then(opponentDoc => {

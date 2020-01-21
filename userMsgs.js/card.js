@@ -36,10 +36,10 @@ const cardHandler = ctx => {
                     game.hands[activeUser].indexOf(usedNum),
                     1
                   ); // create new move record
-                  game.moves.unshift({
-                    user: activeUser,
-                    cardPlayed: ctx.message.text
-                  });
+                  // game.moves.unshift({
+                  //   user: activeUser,
+                  //   cardPlayed: usedNum
+                  // });
                   // pass to evaluate and show possible catches with chosen card
                   ctx.session.game = game;
                   ctx.session.usedNum = usedNum;

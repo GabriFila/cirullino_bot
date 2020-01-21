@@ -11,95 +11,95 @@ shareMove.enter(ctx => {
   console.log('sharing move');
   const { userCatch, usedNum, game } = ctx.session;
   let message = '';
-  // check if calta
+  // check if calata
   const { activeUser } = game;
   const usedCard = numToCard(usedNum);
+
   if (userCatch.length === 0) {
     message = `calato ${usedCard}`;
     game.board.push(usedNum);
-    game.moves[0].type = 'calata';
   } else {
-    // move card from board to weak deck
-    userCatch.forEach(card => {
+    // move card in user catch from board to weak deck
+    userCatch.forEach(numCard => {
       game.userWeakDeck[activeUser].push(
-        ...game.board.splice(game.board.indexOf(card), 1)
+        ...game.board.splice(game.board.indexOf(numCard), 1)
       );
     });
+    // udpate lastWhoTook
+    game.lastWhoTook = activeUser;
     // check if 'scopa'
     if (game.board.length === 0) {
-      game.moves[0].type = 'scopa';
       message = `fatto scopa con ${usedCard}`;
       // if scopa add used card to strongdeck else to weakDeck
       game.userStrongDeck[activeUser].push(ctx.session.usedNum);
     } else {
       // not scopa
-      game.moves[0].type = 'presa';
       message = `preso ${numsToString(userCatch)} con ${usedCard}`;
       game.userWeakDeck[activeUser].push(ctx.session.usedNum);
     }
   }
+
+  // check if hands are empty
+  const handsLenghts = [];
+
+  game.chatIds.forEach((chat, i) => {
+    handsLenghts.push(game.hands[i].length);
+  });
+  let handFinishedMsg;
+  if (handsLenghts.every(length => length === 0)) {
+    if (game.deck.length !== 0) {
+      // hand finished but game keeps going on
+      console.info('empty hands'.green);
+      for (let i = 0; i < Object.keys(game.hands).length; i++)
+        game.hands[i] = game.deck.splice(0, 3);
+      handFinishedMsg = '\nMano terminata, ridiamo le carte!';
+      // game.chatIds.forEach(chat => {
+      //   // TODO tell how many more hands are left
+      //   sendToUser(chat, 'Mano terminata, ridiamo le carte!');
+      // });
+    }
+    // last move of game
+    else if (game.board.length === 0) {
+      // scopa doesn't count
+      game.userWeakDeck[activeUser].push(
+        ...game.userStrongDeck[activeUser].splice(
+          game.userStrongDeck[activeUser].indexOf(usedNum),
+          1
+        )
+      );
+      message = `fatto scopa con ${usedCard} ma non conta perchè è l'ultima mano`;
+    } else {
+      // last hand and takes all
+      game.userWeakDeck[game.lastWhoTook].push(...game.board);
+      message += ` e ${
+        game.names[game.lastWhoTook]
+      } ha preso tutto perchè è l'ultimo che ha preso`;
+    }
+  }
+
+  // share move to other players then update game in db
   Promise.all(
     game.chatIds.map((chatId, i) => {
       if (i !== activeUser)
         return sendToUser(
           chatId,
-          `${ctx.message.from.first_name} ha ${message}`
+          `${ctx.message.from.first_name} ha ${message} ${handFinishedMsg}`
         );
       return sendToUser(chatId, `Hai ${message}`);
     })
   ).then(() => {
     // change activeUser
-
+    // TODO add cloud function to handle progressive move id
+    ctx.session.gameDbRef
+      .collection('moves')
+      .add({ usedNum, user: activeUser })
+      .then(() => console.log('move inserted'));
     game.activeUser = circularNext(activeUser, game.chatIds);
-
-    // check if hands are empty
-    const handsLenghts = [];
-
-    game.chatIds.forEach((chat, i) => {
-      handsLenghts.push(game.hands[i].length);
-    });
-
-    if (handsLenghts.every(length => length === 0)) {
-      if (game.deck.length !== 0) {
-        // hand finished but game keeps going on
-        console.info('empty hands');
-        for (let i = 0; i < Object.keys(game.hands).length; i++)
-          game.hands[i] = game.deck.splice(0, 3);
-        game.chatIds.forEach(chat => {
-          // TODO tell how many more hands are left
-          sendToUser(chat, 'Mano terminata, ridiamo le carte!');
-        });
-      }
-      // else {
-      //   // last hand
-      //   // if so check who made the last move different from 'calata'
-      //   const lastMoveType = game.move[0].type;
-      //   if (lastMoveType === 'scopa') {
-      //     // move strongCard to weak deck and inform users
-      //     game.userWeakDeck[activeUser].push(
-      //       ...game.userStrongDeck[activeUser].splice(
-      //         game.userStrongDeck.length - 1,
-      //         1
-      //       )
-      //     );
-      //   } else if (lastMoveType === 'presa') {
-      //     game.userWeakDeck[activeUser].push(...game.board);
-      //   } else {
-      //     const lastUserNoCalata = game.moves.find(
-      //       move => move.type !== 'calata'
-      //     ).user;
-      //     game.userWeakDeck[lastUserNoCalata].push(...game.board);
-      //   }
-      // }
-    }
-
-    // TODO implement last move
-    // check if it is last move
 
     // update game
     ctx.session.gameDbRef
       .set(game)
-      .then(() => console.info('game updated'))
+      .then(() => console.info('game updated'.green))
       .catch(err => console.error(err));
   });
 });
