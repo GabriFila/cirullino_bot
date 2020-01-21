@@ -1,7 +1,7 @@
 /* eslint-disable no-plusplus */
 const getValue = require('./getValue');
 
-const numToCard = num => {
+module.exports = num => {
   let card = '';
 
   const values = ['', 'A', 2, 3, 4, 5, 6, 7, 'J', 'Q', 'K'];
@@ -20,5 +20,3 @@ const numToCard = num => {
 
   return card;
 };
-
-module.exports = numToCard;

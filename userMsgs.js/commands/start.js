@@ -1,7 +1,8 @@
 /* eslint-disable no-console */
 const { db } = require('../../firebase');
+const { helpMessage } = require('../../helpers/utils.json');
 
-const startHandler = ctx => {
+module.exports = ctx => {
   console.log('/start');
   if ('username' in ctx.message.from) {
     ctx.reply(`Sei pronto a giocare un cirullino con i tuoi amici? 🃏`);
@@ -28,7 +29,7 @@ const startHandler = ctx => {
             { merge: true }
           );
         }
-        ctx.reply('Dimmi come vuoi procedere!');
+        ctx.reply(helpMessage);
       })
       .catch(err => console.error(err));
   } else
@@ -36,4 +37,3 @@ const startHandler = ctx => {
       'Grazie per voler giocare! Manca ancora una cosa però, devi impostare il tuo username su telegram, altrimenti gli altri non potranno giocare con te!\nQuando hai fatto, rimandami il comando /start e potrai giocare'
     );
 };
-module.exports = startHandler;

@@ -1,4 +1,4 @@
-const indexOfMax = arr => {
+module.exports = arr => {
   if (arr.length === 0) {
     return -1;
   }
@@ -15,5 +15,3 @@ const indexOfMax = arr => {
 
   return maxIndex;
 };
-
-module.exports = indexOfMax;

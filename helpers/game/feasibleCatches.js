@@ -1,7 +1,7 @@
 const getValue = require('./getValue');
 const possibleCombs = require('../general/possibleCombs');
 
-const feasibleCatches = (board, usedCard) => {
+module.exports = (board, usedCard) => {
   const catches = [];
   const usedCardValue = getValue(usedCard);
   const boardTotal = board
@@ -27,4 +27,3 @@ const feasibleCatches = (board, usedCard) => {
 
   return catches;
 };
-module.exports = feasibleCatches;

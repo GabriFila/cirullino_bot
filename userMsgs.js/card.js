@@ -2,9 +2,7 @@
 const { db } = require('../firebase');
 const cardToNum = require('../helpers/game/cardToNum');
 
-const cardHandler = ctx => {
-  // stage.enter('show-moves');
-
+module.exports = ctx => {
   // when bot receives a card it checks if the user has an active game, if so it checks if it is the active user, then processes the move e updates the other players
   console.info('reiceved card');
   const senderUsername = ctx.message.from.username.toLowerCase();
@@ -35,11 +33,7 @@ const cardHandler = ctx => {
                   game.hands[activeUser].splice(
                     game.hands[activeUser].indexOf(usedNum),
                     1
-                  ); // create new move record
-                  // game.moves.unshift({
-                  //   user: activeUser,
-                  //   cardPlayed: usedNum
-                  // });
+                  );
                   // pass to evaluate and show possible catches with chosen card
                   ctx.session.game = game;
                   ctx.session.usedNum = usedNum;
@@ -60,5 +54,3 @@ const cardHandler = ctx => {
       });
     });
 };
-
-module.exports = cardHandler;

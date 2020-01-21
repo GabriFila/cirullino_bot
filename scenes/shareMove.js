@@ -1,7 +1,7 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable no-console */
 const Scene = require('telegraf/scenes/base');
-const { circularNext } = require('../helpers/common');
+const circularNext = require('../helpers/general/circularNext');
 const sendToUser = require('../helpers/general/sendToUser');
 const numToCard = require('../helpers/game/numToCard');
 const numsToString = require('../helpers/game/numsToString');
@@ -50,8 +50,9 @@ shareMove.enter(ctx => {
       for (let i = 0; i < Object.keys(game.hands).length; i++)
         game.hands[i] = game.deck.splice(0, 3);
       const handsLeft = game.deck.length / 6;
-
-      handFinishedMsg = `\nMano terminata, ridiamo le carte! Ci sono ancora ${handsLeft} mani`;
+      handFinishedMsg = `\nMano terminata, ridiamo le carte!\n`;
+      if (handsLeft !== 0) handFinishedMsg += `Mani restanti: ${handsLeft}`;
+      else handFinishedMsg += `Ultima mano`;
     }
     // last move of game
     else if (game.board.length === 0) {

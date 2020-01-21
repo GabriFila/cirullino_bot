@@ -1,6 +1,6 @@
-const helpHandler = ctx => {
-  console.log("/help");
-  ctx.reply(`Se hai delle necessità su questo bot scrvi una mail a gabriele.filaferro@gmail.com`);
-};
+const { helpMessage } = require('../../helpers/utils.json');
 
-module.exports = helpHandler;
+module.exports = ctx => {
+  console.log('/help');
+  ctx.reply(helpMessage);
+};

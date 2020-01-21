@@ -7,7 +7,7 @@ const parseUsername = require('../helpers/general/parseUsername');
 const { db } = admin;
 
 const checkOpponents = new Scene('check-opponents');
-// TODO support asking of more then 1 opponent
+
 checkOpponents.enter(ctx => {
   console.info('checking-opponent');
   ctx.reply('Ricevuto! Controllo...');

@@ -3,7 +3,7 @@ const getRandomInt = require('../general/getRandomInt');
 const getValue = require('./getValue');
 const { deck40 } = require('../utils.json');
 
-const prepGame = (chatIds, names) => {
+module.exports = (chatIds, names, usernames) => {
   const shuffledDeck = deck40.sort(() => Math.random() - 0.5);
 
   const game = {
@@ -11,12 +11,12 @@ const prepGame = (chatIds, names) => {
     hands: {},
     board: shuffledDeck.splice(0, 4),
     points: chatIds.map(() => 0),
-    moves: [],
     userStrongDeck: {},
     userWeakDeck: {},
     activeUser: getRandomInt(0, chatIds.length),
     chatIds,
-    names
+    names,
+    usernames
   };
 
   chatIds.forEach((chat, i) => {
@@ -72,5 +72,3 @@ const prepGame = (chatIds, names) => {
 
   return game;
 };
-
-module.exports = prepGame;

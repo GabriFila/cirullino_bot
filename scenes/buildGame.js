@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 const Scene = require('telegraf/scenes/base');
 
-const { db } = require('../firebase');
 const admin = require('../firebase');
 const prepGame = require('../helpers/game/prepGame');
 
@@ -10,14 +9,11 @@ const buildGame = new Scene('build-game');
 buildGame.enter(ctx => {
   console.info('buildfing game');
   const { updatedPlayers } = ctx.session;
-  // db.collection('decks')
-  //   .doc('40cards')
-  //   .get()
-  //   .then(deckDbRef => {
+
   const newGame = prepGame(
-    // deckDbRef.data().deck,
     updatedPlayers.chatIds,
-    updatedPlayers.names
+    updatedPlayers.names,
+    updatedPlayers.usernames
   );
   const { groupDbRef } = ctx.session;
   groupDbRef

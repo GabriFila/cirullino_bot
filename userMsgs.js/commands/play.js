@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 const { Markup } = require('telegraf');
 
-const playHandler = ctx => {
+module.exports = ctx => {
   // TODO deactive all active game
   console.info('/newgame');
   ctx.reply(
@@ -14,5 +14,3 @@ const playHandler = ctx => {
   // ctx.reply(`Chi vuoi sfidare? Dimmi l'username`);
   ctx.scene.enter('count-opponents');
 };
-
-module.exports = playHandler;
