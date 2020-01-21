@@ -10,11 +10,10 @@ const helpHandler = require('./userMsgs.js/commands/help');
 const playHandler = require('./userMsgs.js/commands/play');
 const enterHandler = require('./userMsgs.js/commands/enter');
 const refuseHandler = require('./userMsgs.js/refuse');
+const privacyHandler = require('./userMsgs.js/commands/privacy');
 
 // user msg handlers
 const cardHandler = require('./userMsgs.js/card');
-
-// TODO map card to integer
 
 // scenes
 
@@ -67,7 +66,7 @@ bot.command(['newgame', 'sfida'], playHandler);
 bot.command(['enter', 'entra'], enterHandler);
 
 // TODO implement privacy info response
-bot.command('privacy', enterHandler);
+bot.command('privacy', privacyHandler);
 
 bot.hears(new RegExp(cardRegEx), cardHandler);
 
@@ -77,4 +76,5 @@ bot.hears(new RegExp(cardRegEx), cardHandler);
 // ♣
 // ♠
 
+// TODO implement possibility to exit game
 module.exports.stage = stage;

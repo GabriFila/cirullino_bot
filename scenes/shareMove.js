@@ -16,31 +16,12 @@ shareMove.enter(ctx => {
   const { activeUser } = game;
   const usedCard = numToCard(usedNum);
 
-  console.log(Array.isArray(userCatch));
   if (userCatch.length === 0) {
     message = `calato ${usedCard}`;
     game.board.push(usedNum);
   } else {
-    // move card in user catch from board to weak deck
-    // userCatch.forEach(numCard => {
-    //   const tempIdx = game.board.indexOf(numCard);
-    //   console.log(tempIdx);
-    //   game.userWeakDeck[activeUser].push(
-    //     ...game.board.splice(game.board.indexOf(numCard), 1)
-    //   );
-    // });
-
-    // userCatch.forEach(numCard => {
-    //   const tempIdx = game.board.indexOf(numCard);
-    //   console.log(tempIdx);
-    //   game.board.splice(game.board.indexOf(numCard), 1);
-    // });
     game.userWeakDeck[activeUser].push(...userCatch);
-    game.board.forEach(elm => console.log(userCatch.indexOf(elm)));
     game.board = game.board.filter(elm => userCatch.indexOf(elm) === -1);
-    // trying filtering
-    // la board è uguale alla board con solo gli le
-
     // udpate lastWhoTook
     game.lastWhoTook = activeUser;
     // check if 'scopa'
@@ -68,11 +49,9 @@ shareMove.enter(ctx => {
       console.info('empty hands'.green);
       for (let i = 0; i < Object.keys(game.hands).length; i++)
         game.hands[i] = game.deck.splice(0, 3);
-      handFinishedMsg = '\nMano terminata, ridiamo le carte!';
-      // game.chatIds.forEach(chat => {
-      //   // TODO tell how many more hands are left
-      //   sendToUser(chat, 'Mano terminata, ridiamo le carte!');
-      // });
+      const handsLeft = game.deck.length / 6;
+
+      handFinishedMsg = `\nMano terminata, ridiamo le carte! Ci sono ancora ${handsLeft} mani`;
     }
     // last move of game
     else if (game.board.length === 0) {

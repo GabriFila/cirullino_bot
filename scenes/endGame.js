@@ -11,6 +11,7 @@ endGame.enter(ctx => {
   const { game, gameDbRef, groupDbRef } = ctx.session;
   const results = calculatePoints(game.userStrongDeck, game.userWeakDeck);
 
+  // TODO make same message for all user where are all points
   // send points to users
   game.chatIds.forEach((chatId, i) => {
     // compose message with points
@@ -37,6 +38,7 @@ endGame.enter(ctx => {
   // calculate points
 
   // TODO udpate wins and losses of user
+
   console.log('game ended');
 });
 
