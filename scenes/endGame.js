@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
 const Scene = require('telegraf/scenes/base');
 
-const { calculatePoints } = require('../helpers/gameHelpers');
-const { sendToUser } = require('../helpers/common');
+const calculatePoints = require('../helpers/game/calculatePoints');
+const sendToUser = require('../helpers/general/sendToUser');
 
 const endGame = new Scene('end-game');
 
@@ -11,7 +11,7 @@ endGame.enter(ctx => {
   const { game, gameDbRef, groupDbRef } = ctx.session;
   const results = calculatePoints(game.userStrongDeck, game.userWeakDeck);
 
-  // send message with points
+  // send points to users
   game.chatIds.forEach((chatId, i) => {
     // compose message with points
     let message = `Il gioco è terminato!\n`;
@@ -31,11 +31,12 @@ endGame.enter(ctx => {
   });
   // update points in db
   game.points = results.points;
-  gameDbRef.set({ game }, { merge: true });
+  gameDbRef.set(game, { merge: true });
   groupDbRef.set({ isActive: false, activeGame: null }, { merge: true });
 
   // calculate points
-  // send points to users
+
+  // TODO udpate wins and losses of user
   console.log('game ended');
 });
 

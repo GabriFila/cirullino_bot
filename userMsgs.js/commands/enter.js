@@ -1,8 +1,6 @@
 /* eslint-disable no-console */
 const { db } = require('../../firebase');
-// helper
-
-// game helpers
+const parseUsername = require('../../helpers/general/parseUsername');
 
 const enterHandler = ctx => {
   console.info('/enter');
@@ -11,21 +9,21 @@ const enterHandler = ctx => {
 
   // check if there is a pending game with the username
   // if there is , it changes the corresponding state of the player and then if all the players are true the game starts
-  const senderUsername = ctx.message.from.username.toLowerCase();
+  const senderUsername = parseUsername(ctx.message.from.username);
   const pendingGameRef = db
     .collection('pendingGames')
     .where('usernames', 'array-contains', `${senderUsername}`);
 
-  pendingGameRef.get().then(querySnapshot => {
-    querySnapshot.forEach(pendingGameDbRef => {
-      const updatedPlayers = pendingGameDbRef.data();
+  pendingGameRef.get().then(docs => {
+    docs.forEach(doc => {
+      const updatedPlayers = doc.data();
 
       updatedPlayers.hasAccepted[
-        pendingGameDbRef.data().usernames.indexOf(senderUsername)
+        doc.data().usernames.indexOf(senderUsername)
       ] = true;
 
       if (updatedPlayers.hasAccepted.every(elm => elm === true))
-        pendingGameDbRef.ref.delete();
+        doc.ref.delete();
 
       ctx.session.updatedPlayers = updatedPlayers;
       ctx.scene.enter('activate-group');

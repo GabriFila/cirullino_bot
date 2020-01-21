@@ -17,7 +17,8 @@ checkCatch.hears(new RegExp(cardRegEx, 'g'), ctx => {
   ctx.session.userCatch = userCatch.map(card => cardToNum(card));
   ctx.scene.enter('share-move');
 
-  // FIXME it doesn't work when make scopa
+  // FIXME check user catch
+
   // if (isCatchValid(userCatch, ctx.session.catches)) {
   //   //if (ctx.session.catches.includes(userCatch)) {
   //   console.log('valid catch');
