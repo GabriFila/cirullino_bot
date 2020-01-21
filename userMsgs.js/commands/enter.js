@@ -2,7 +2,7 @@
 const { db } = require('../../firebase');
 const parseUsername = require('../../helpers/general/parseUsername');
 
-const enterHandler = ctx => {
+module.exports = ctx => {
   console.info('/enter');
 
   // TODO reset all active games
@@ -30,5 +30,3 @@ const enterHandler = ctx => {
     });
   });
 };
-
-module.exports = enterHandler;

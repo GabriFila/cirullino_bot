@@ -1,7 +1,7 @@
 const { Markup } = require('telegraf');
 const bot = require('../../bot');
 
-const sendToUser = (chatId, text, buttons, columns) =>
+module.exports = (chatId, text, buttons, columns) =>
   bot.telegram.sendMessage(
     chatId,
     text,
@@ -14,5 +14,3 @@ const sendToUser = (chatId, text, buttons, columns) =>
           .extra()
       : Markup.removeKeyboard().extra()
   );
-
-module.exports = sendToUser;

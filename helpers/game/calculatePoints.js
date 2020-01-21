@@ -3,7 +3,7 @@ const indexOfMax = require('../general/indexOfMax');
 const isDiamond = require('./isDiamond');
 const getValue = require('./getValue');
 
-const calculatePoints = (strongDecks, weakDecks) => {
+module.exports = (strongDecks, weakDecks) => {
   const points = [];
   const diamonds = [];
   const cards = [];
@@ -78,4 +78,3 @@ const calculatePoints = (strongDecks, weakDecks) => {
     whoHasPrimiera
   };
 };
-module.exports = calculatePoints;

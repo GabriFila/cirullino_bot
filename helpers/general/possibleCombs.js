@@ -1,5 +1,4 @@
-/* eslint-disable no-plusplus */
-const possibleCombs = array => {
+module.exports = array => {
   const fn = (n, src, got, all) => {
     if (n === 0) {
       if (got.length > 0) {
@@ -7,14 +6,14 @@ const possibleCombs = array => {
       }
       return;
     }
-    for (let j = 0; j < src.length; j++) {
+    for (let j = 0; j < src.length; j += 1) {
       fn(n - 1, src.slice(j + 1), got.concat([src[j]]), all);
     }
   };
 
   const all = [];
 
-  for (let i = 1; i < array.length; i++) {
+  for (let i = 1; i < array.length; i += 1) {
     fn(i, array, [], all);
   }
 
@@ -22,4 +21,3 @@ const possibleCombs = array => {
 
   return all;
 };
-module.exports = possibleCombs;

@@ -1,3 +1,1 @@
-const refuseHandler = () => {};
-
-module.exports = refuseHandler;
+module.exports = () => {};

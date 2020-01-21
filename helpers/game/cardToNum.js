@@ -1,6 +1,6 @@
 // function to convert a card from string to integer
 
-const cardToNum = card => {
+module.exports = card => {
   let value = card.charAt(0);
 
   if (Number.isNaN(Number(value))) {
@@ -23,8 +23,6 @@ const cardToNum = card => {
   const suit = suitMap[card.charAt(1)];
   return value + suit;
 };
-
-module.exports = cardToNum;
 
 // ♥️
 // ♦
