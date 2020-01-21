@@ -17,6 +17,13 @@
       "name": "Temp",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}\\temp.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Points",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}\\helpers\\game\\calculatePoints.js"
     }
   ]
 }

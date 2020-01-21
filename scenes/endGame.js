@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 const Scene = require('telegraf/scenes/base');
 
-const { calculatePoints } = require('../helpers/gameHelpers');
+const calculatePoints = require('../helpers/game/calculatePoints');
 const { sendToUser } = require('../helpers/common');
 
 const endGame = new Scene('end-game');

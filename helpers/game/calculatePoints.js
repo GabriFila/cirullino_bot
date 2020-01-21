@@ -27,15 +27,17 @@ const calculatePoints = (strongDecks, weakDecks) => {
     cards.push(weakDecks[usr].length);
     // TODO keep going on primiera
     if (weakDecks[usr].filter(card => getValue(card) === 7).length === 3) {
-      whoHasPrimiera = Number(usr);
+      whoHasPrimiera = usr;
+      points[whoHasPrimiera] += 1;
     }
+
     // calc piccola
     if (
       weakDecks[usr].includes(11) &&
       weakDecks[usr].includes(12) &&
       weakDecks[usr].includes(13)
     ) {
-      whoHasPiccola = Number(usr);
+      whoHasPiccola = usr;
       for (let j = 0; j < 3; j += 1) {
         if (weakDecks[usr].includes(j + 14)) piccolaValue = j + 1;
         else break;
@@ -63,8 +65,8 @@ const calculatePoints = (strongDecks, weakDecks) => {
   // check which user has 'carte' and 'denari'
   if (!isThereMoreThanOneMax(diamonds)) whoHasDiamonds = indexOfMax(diamonds);
   if (!isThereMoreThanOneMax(cards)) whoHasCards = indexOfMax(cards);
-  points[whoHasDiamonds] += 1;
-  points[whoHasCards] += 1;
+  if (whoHasDiamonds !== -1) points[whoHasDiamonds] += 1;
+  if (whoHasCards !== -1) points[whoHasCards] += 1;
   return {
     points,
     whoHasCards,
@@ -78,7 +80,7 @@ const calculatePoints = (strongDecks, weakDecks) => {
 };
 module.exports = calculatePoints;
 
-const strongs = { 0: [6, 3, 4], 1: [9] };
-const weaks = { 0: [1, 2], 1: [] };
+const strongs = { 0: [11, 12, 13], 1: [20] };
+const weaks = { 0: [15, 16, 14], 1: [18, 19] };
 
 console.log(calculatePoints(strongs, weaks));
