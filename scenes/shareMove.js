@@ -15,16 +15,31 @@ shareMove.enter(ctx => {
   const { activeUser } = game;
   const usedCard = numToCard(usedNum);
 
+  console.log(Array.isArray(userCatch));
   if (userCatch.length === 0) {
     message = `calato ${usedCard}`;
     game.board.push(usedNum);
   } else {
     // move card in user catch from board to weak deck
-    userCatch.forEach(numCard => {
-      game.userWeakDeck[activeUser].push(
-        ...game.board.splice(game.board.indexOf(numCard), 1)
-      );
-    });
+    // userCatch.forEach(numCard => {
+    //   const tempIdx = game.board.indexOf(numCard);
+    //   console.log(tempIdx);
+    //   game.userWeakDeck[activeUser].push(
+    //     ...game.board.splice(game.board.indexOf(numCard), 1)
+    //   );
+    // });
+
+    // userCatch.forEach(numCard => {
+    //   const tempIdx = game.board.indexOf(numCard);
+    //   console.log(tempIdx);
+    //   game.board.splice(game.board.indexOf(numCard), 1);
+    // });
+    game.userWeakDeck[activeUser].push(...userCatch);
+    game.board.forEach(elm => console.log(userCatch.indexOf(elm)));
+    game.board = game.board.filter(elm => userCatch.indexOf(elm) === -1);
+    // trying filtering
+    // la board è uguale alla board con solo gli le
+
     // udpate lastWhoTook
     game.lastWhoTook = activeUser;
     // check if 'scopa'
@@ -83,9 +98,10 @@ shareMove.enter(ctx => {
       if (i !== activeUser)
         return sendToUser(
           chatId,
-          `${ctx.message.from.first_name} ha ${message} ${handFinishedMsg}`
+          `${ctx.message.from.first_name} ha ${message} ${handFinishedMsg ||
+            ''}`
         );
-      return sendToUser(chatId, `Hai ${message}`);
+      return sendToUser(chatId, `Hai ${message} ${handFinishedMsg || ''}`);
     })
   ).then(() => {
     // change activeUser
