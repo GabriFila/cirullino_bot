@@ -4,6 +4,8 @@
 /* eslint-disable no-console */
 const { db } = require('../firebase');
 const isBussata = require('../helpers/game/isBussata');
+const areLess9 = require('../helpers/game/areLess9');
+const are3EqualCards = require('../helpers/game/are3EqualCards');
 
 module.exports = ctx => {
   // when bot receives a card it checks if the user has an active game, if so it checks if it is the active user, then processes the move e updates the other players
@@ -30,6 +32,12 @@ module.exports = ctx => {
 
               if (isBussata(game.hands[activeUser])) {
                 // TODO add point only once
+                if (!game.isBussing[activeUser]) {
+                  if (areLess9(game.hands[activeUser]))
+                    game.bonusPoints[activeUser] += 3;
+                  if (are3EqualCards(game.hands[activeUser]))
+                    game.bonusPoints[activeUser] += 10;
+                }
                 game.isBussing[activeUser] = true;
                 doc.ref.set(game, { merge: true });
               } else ctx.reply(`Non puoi bussare ora`);

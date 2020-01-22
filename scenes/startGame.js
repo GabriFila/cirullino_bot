@@ -31,7 +31,10 @@ startGame.enter(ctx => {
           : `In tavola:   ${numsToString(game.board)}\n`;
       // TODO implement bussare
       game.chatIds.forEach((chatId, i) => {
-        const userDecksMsg = `Hai:\n  scope: ${game.userStrongDeck[i].length}\n  mazzetto: ${game.userWeakDeck[i].length}\n`;
+        let userDecksMsg = `Hai:\n  scope: ${game.userStrongDeck[i].length}\n  mazzetto: ${game.userWeakDeck[i].length}\n`;
+        if (game.bonusPoints[i] !== 0)
+          userDecksMsg += `Punti bonus: ${game.bonusPoints[i]}\n`;
+
         let bussataMsg = ``;
 
         const handButtons = game.hands[activeUser].map(num => numToCard(num));
@@ -42,6 +45,7 @@ startGame.enter(ctx => {
           if (state)
             bussataMsg += `${
               game.names[j]
+              // TODO communicate type of bussata
             } ha bussato, le sue carte:\n${numsToString(game.hands[j])}\n`;
         });
 

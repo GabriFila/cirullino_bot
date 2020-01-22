@@ -4,7 +4,7 @@ const isDiamond = require('./isDiamond');
 const getValue = require('./getValue');
 
 // TODO implement addittive points for bussate
-module.exports = (strongDecks, weakDecks) => {
+module.exports = (strongDecks, weakDecks, bonusPoints) => {
   const points = [];
   const diamonds = [];
   const cards = [];
@@ -68,6 +68,10 @@ module.exports = (strongDecks, weakDecks) => {
   if (!isThereMoreThanOneMax(cards)) whoHasCards = indexOfMax(cards);
   if (whoHasDiamonds !== -1) points[whoHasDiamonds] += 1;
   if (whoHasCards !== -1) points[whoHasCards] += 1;
+
+  // add bonus points to points
+  points.map((point, i) => point + bonusPoints[i]);
+
   return {
     points,
     whoHasCards,

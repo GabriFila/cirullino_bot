@@ -12,6 +12,7 @@ module.exports = (chatIds, names, usernames) => {
     hands: {},
     board: shuffledDeck.splice(0, 4),
     points: chatIds.map(() => 0),
+    bonusPoints: chatIds.map(() => 0),
     userStrongDeck: {},
     userWeakDeck: {},
     activeUser: getRandomInt(0, chatIds.length),
