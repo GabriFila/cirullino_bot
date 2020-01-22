@@ -12,6 +12,7 @@ const playHandler = require('./userMsgs.js/commands/play');
 const enterHandler = require('./userMsgs.js/commands/enter');
 const refuseHandler = require('./userMsgs.js/refuse');
 const privacyHandler = require('./userMsgs.js/commands/privacy');
+const bussataHandler = require('./userMsgs.js/bussata');
 
 // user msg handlers
 const cardHandler = require('./userMsgs.js/card');
@@ -72,11 +73,7 @@ bot.command('privacy', privacyHandler);
 
 bot.hears(new RegExp(cardRegEx), cardHandler);
 
-// suit emojis
-// ♥️
-// ♦
-// ♣
-// ♠
+bot.hears(['Bussare', 'bussare'], bussataHandler);
 
 // TODO implement possibility to exit game
 module.exports.stage = stage;

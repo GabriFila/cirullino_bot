@@ -1,5 +1,5 @@
 {
-  "helpMessage": "Per iniziare una partita scrivi /sfida\nPer Avere info sulla privacy scrivi /privacy\nPer sapere di più su questo bot scrivi /about",
+  "helpMessage": "Per iniziare una partita scrivi /sfida\nPer avere info sulla privacy scrivi /privacy\nPer sapere di più su questo bot scrivi /about",
   "cardRegEx": "[A0123456789JQK][♥️♦♣♠]",
   "deck40": [
     1,

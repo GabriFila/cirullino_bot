@@ -15,6 +15,7 @@ module.exports = ctx => {
       groups.forEach(group => {
         group
           .data()
+          // get active game
           .activeGame.get()
           .then(doc => {
             if (doc.exists) {
@@ -23,9 +24,9 @@ module.exports = ctx => {
               const { activeUser } = game;
               if (game.chatIds[activeUser] === ctx.message.chat.id) {
                 console.info('validating hand'.green);
-                // check if user has used card in own hand
                 const usedNum = cardToNum(ctx.message.text);
 
+                // check if user used own card
                 if (!game.hands[activeUser].includes(usedNum))
                   ctx.reply(`⚠️Hai giocato una carta che non hai in mano!`);
                 else {

@@ -3,6 +3,7 @@ const indexOfMax = require('../general/indexOfMax');
 const isDiamond = require('./isDiamond');
 const getValue = require('./getValue');
 
+// TODO implement addittive points for bussate
 module.exports = (strongDecks, weakDecks) => {
   const points = [];
   const diamonds = [];

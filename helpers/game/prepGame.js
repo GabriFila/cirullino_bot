@@ -8,6 +8,7 @@ module.exports = (chatIds, names, usernames) => {
 
   const game = {
     deck: shuffledDeck,
+    isBussing: chatIds.map(() => false),
     hands: {},
     board: shuffledDeck.splice(0, 4),
     points: chatIds.map(() => 0),
