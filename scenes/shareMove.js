@@ -47,6 +47,8 @@ shareMove.enter(ctx => {
     if (game.deck.length !== 0) {
       // hand finished but game keeps going on
       console.info('empty hands'.green);
+      // reset bussata for next hand
+      game.isBussing = game.chatIds.map(() => false);
       for (let i = 0; i < Object.keys(game.hands).length; i++)
         game.hands[i] = game.deck.splice(0, 3);
       const handsLeft = game.deck.length / 6;

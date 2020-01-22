@@ -4,6 +4,7 @@ const Scene = require('telegraf/scenes/base');
 const sendToUser = require('../helpers/general/sendToUser');
 const numsToString = require('../helpers/game/numsToString');
 const numToCard = require('../helpers/game/numToCard');
+const isBussata = require('../helpers/game/isBussata');
 
 const startGame = new Scene('start-game');
 
@@ -12,9 +13,6 @@ startGame.enter(ctx => {
   const unsubscribe = gameDbRef.onSnapshot(doc => {
     const game = doc.data();
     const handsLenghts = [];
-
-    // for (const [key, value] of Object.entries(game.hands))
-    //   handsLenghts.push(value.length);
 
     for (let i = 0; i < Object.keys(game.hands).length; i++)
       handsLenghts.push(game.hands[i].length);
@@ -25,6 +23,7 @@ startGame.enter(ctx => {
       ctx.scene.enter('end-game');
     } else {
       console.info('ask-move');
+
       const { activeUser } = game;
       const message =
         game.board.length === 0
@@ -32,14 +31,23 @@ startGame.enter(ctx => {
           : `In tavola:   ${numsToString(game.board)}\n`;
       // TODO implement bussare
       game.chatIds.forEach((chatId, i) => {
-        const userMsg = `Hai:\n  scope: ${game.userStrongDeck[i].length}\n  mazzetto: ${game.userWeakDeck[i].length}`;
-        sendToUser(chatId, message + userMsg).then(() => {
+        const userDecksMsg = `Hai:\n  scope: ${game.userStrongDeck[i].length}\n  mazzetto: ${game.userWeakDeck[i].length}\n`;
+        let bussataMsg = ``;
+
+        const handButtons = game.hands[activeUser].map(num => numToCard(num));
+
+        if (isBussata(game.hands[i])) handButtons.push('Bussare');
+
+        game.isBussing.forEach((state, j) => {
+          if (state)
+            bussataMsg += `${
+              game.names[j]
+            } ha bussato, le sue carte:\n${numsToString(game.hands[j])}\n`;
+        });
+
+        sendToUser(chatId, message + userDecksMsg + bussataMsg).then(() => {
           if (i === activeUser)
-            sendToUser(
-              game.chatIds[activeUser],
-              'Tocca a te',
-              game.hands[activeUser].map(num => numToCard(num))
-            );
+            sendToUser(game.chatIds[activeUser], `Tocca a te`, handButtons, 3);
           else sendToUser(chatId, `Tocca a ${game.names[activeUser]}`);
         });
       });

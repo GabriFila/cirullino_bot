@@ -12,5 +12,5 @@ module.exports = (chatId, text, buttons, columns) =>
           .oneTime()
           .resize()
           .extra()
-      : Markup.removeKeyboard().extra()
+      : Markup.keyboard([''])
   );
