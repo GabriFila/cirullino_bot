@@ -13,7 +13,11 @@ const endGame = new Scene('end-game');
 endGame.enter(ctx => {
   console.log('game ending');
   const { game, gameDbRef, groupDbRef } = ctx.session;
-  const results = calculatePoints(game.userStrongDeck, game.userWeakDeck);
+  const results = calculatePoints(
+    game.userStrongDeck,
+    game.userWeakDeck,
+    game.bonusPoints
+  );
 
   // send points to users
   let message = `Il gioco è terminato!\n`;

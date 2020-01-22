@@ -1,12 +1,12 @@
-const getValue = require('./getValue');
+const areLess9 = require('./areLess9');
+const are3EqualCards = require('./are3EqualCards');
 
 module.exports = hand => {
   return (
     hand.length === 3 &&
-    (hand.reduce((acc, val) => (acc += getValue(val)), 0) <= 9 ||
+    (areLess9(hand) ||
       // if all 3 equals
-      (getValue(hand[0]) === getValue(hand[1]) &&
-        getValue(hand[0]) === getValue(hand[2])))
+      are3EqualCards(hand))
+    // show only on first step of new hand
   );
-  // show only on first step of new hand
 };

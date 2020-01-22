@@ -15,6 +15,7 @@ buildGame.enter(ctx => {
     updatedPlayers.names,
     updatedPlayers.usernames
   );
+  // TODO implement possibility of starting with empty board when board total is 15 or 30
   const { groupDbRef } = ctx.session;
   groupDbRef
     .collection('groupGames')
