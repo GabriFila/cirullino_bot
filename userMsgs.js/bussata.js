@@ -31,7 +31,7 @@ module.exports = ctx => {
               const { activeUser } = game;
 
               if (isBussata(game.hands[activeUser])) {
-                // TODO add point only once
+                // TODO check bussata
                 if (!game.isBussing[activeUser]) {
                   if (areLess9(game.hands[activeUser]))
                     game.bonusPoints[activeUser] += 3;
