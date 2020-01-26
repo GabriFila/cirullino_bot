@@ -1,12 +1,12 @@
 const getValue = require('./getValue');
 const possibleCombs = require('../general/possibleCombs');
+const getBoardTotal = require('./getBoardTotal');
 
 module.exports = (board, usedCard) => {
   const catches = [];
   const usedCardValue = getValue(usedCard);
-  const boardTotal = board
-    .map(card => getValue(card))
-    .reduce((acc, val) => acc + val, 0);
+
+  const boardTotal = getBoardTotal(board);
   // twoways to make 'scopa' split in two if statements
   if (usedCardValue === 1 && !board.some(card => getValue(card) === 1))
     catches.push(board);

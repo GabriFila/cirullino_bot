@@ -37,13 +37,9 @@ shareMove.enter(ctx => {
   }
 
   // check if hands are empty
-  const handsLenghts = [];
 
-  game.chatIds.forEach((chat, i) => {
-    handsLenghts.push(game.hands[i].length);
-  });
   let handFinishedMsg;
-  if (handsLenghts.every(length => length === 0)) {
+  if (game.chatIds.every((chatId, i) => game.hands[i].length === 0)) {
     if (game.deck.length !== 0) {
       // hand finished but game keeps going on
       console.info('empty hands'.green);
