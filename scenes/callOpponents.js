@@ -22,7 +22,7 @@ callOpponents.enter(ctx => {
       )
   );
 
-  // TODO tell user hwho invited
+  // TODO tell user who invited
   // ask players to join
   Promise.all(
     opChatIds.map(chatId =>
