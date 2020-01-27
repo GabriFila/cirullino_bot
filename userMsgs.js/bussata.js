@@ -13,7 +13,6 @@ module.exports = ctx => {
   const senderUsername = ctx.message.from.username.toLowerCase();
   // check if there is a active group with user in it
 
-  // TODO make one function to check if user is playing for other scenes
   db.collection('groups')
     .where('isActive', '==', true)
     .where('usernames', 'array-contains', senderUsername)
@@ -31,14 +30,16 @@ module.exports = ctx => {
               const { activeUser } = game;
 
               if (isBussata(game.hands[activeUser])) {
-                // TODO check bussata
-                if (!game.isBussing[activeUser]) {
-                  if (areLess9(game.hands[activeUser]))
+                if (game.isBussing[activeUser] === 0) {
+                  if (areLess9(game.hands[activeUser])) {
+                    game.isBussing[activeUser] = 1;
                     game.bonusPoints[activeUser] += 3;
-                  if (are3EqualCards(game.hands[activeUser]))
+                  }
+                  if (are3EqualCards(game.hands[activeUser])) {
+                    game.isBussing[activeUser] = 2;
                     game.bonusPoints[activeUser] += 10;
+                  }
                 }
-                game.isBussing[activeUser] = true;
                 doc.ref.set(game, { merge: true });
               } else ctx.reply(`Non puoi bussare ora`);
             } else {

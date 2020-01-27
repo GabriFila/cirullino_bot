@@ -44,7 +44,7 @@ shareMove.enter(ctx => {
       // hand finished but game keeps going on
       console.info('empty hands'.green);
       // reset bussata for next hand
-      game.isBussing = game.chatIds.map(() => false);
+      game.isBussing = game.chatIds.map(() => 0);
       for (let i = 0; i < Object.keys(game.hands).length; i++)
         game.hands[i] = game.deck.splice(0, 3);
       const handsLeft = game.deck.length / 6;
@@ -84,13 +84,9 @@ shareMove.enter(ctx => {
     })
   ).then(() => {
     // change activeUser
-    // TODO add cloud function to handle progressive move id
-    ctx.session.gameDbRef
-      .collection('moves')
-      .add({ usedNum, user: activeUser })
-      .then(() => console.log('move inserted'));
     game.activeUser = circularNext(activeUser, game.chatIds);
-
+    // add record to moves
+    game.moves.push({ usedNum, user: activeUser });
     // update game
     ctx.session.gameDbRef
       .set(game)

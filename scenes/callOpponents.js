@@ -22,13 +22,12 @@ callOpponents.enter(ctx => {
       )
   );
 
-  // TODO tell user who invited
   // ask players to join
   Promise.all(
     opChatIds.map(chatId =>
       sendToUser(
         chatId,
-        `Sei stato invitato a giocare da , se vuoi entare rispondimi /entra`
+        `Sei stato invitato a giocare da ${ctx.session.starter}, se vuoi entare rispondimi /entra`
       )
     )
   )

@@ -19,10 +19,6 @@ checkOpponents.enter(ctx => {
       name: ctx.message.from.first_name, // need for better user experience during game
       hasAccepted: true // check when to start game
     }
-
-    // hasAccepted contains the accepted status of each user in the pending game
-    // order of hasAccepted is alphabetical on usernames
-    // of course starter player must be set to true
   ];
   Promise.all(
     ctx.session.oppUsernames.map(username =>
@@ -43,6 +39,9 @@ checkOpponents.enter(ctx => {
     )
   )
     .then(() => {
+      // hasAccepted contains the accepted status of each user in the pending game
+      // order of hasAccepted is alphabetical on usernames
+      // of course starter player must be set to true
       const pendingGame = {
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
         usernames: [],
@@ -59,7 +58,7 @@ checkOpponents.enter(ctx => {
           pendingGame.names.push(pData.name);
           pendingGame.hasAccepted.push(pData.hasAccepted);
         });
-
+      ctx.session.starter = ctx.message.from.first_name;
       ctx.session.pendingGame = pendingGame;
       ctx.scene.enter('call-opponents');
     })

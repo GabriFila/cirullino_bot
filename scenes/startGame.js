@@ -30,6 +30,7 @@ startGame.enter(ctx => {
           ? 'Tavola vuota\n'
           : `In tavola:   ${numsToString(game.board)}\n`;
 
+      // TODO implement Matta
       game.chatIds.forEach((chatId, i) => {
         let userDecksMsg = `Hai:\n  scope: ${game.userStrongDeck[i].length}\n  mazzetto: ${game.userWeakDeck[i].length}\n`;
         if (game.bonusPoints[i] !== 0)
@@ -41,17 +42,25 @@ startGame.enter(ctx => {
 
         let bussataMsg = ``;
 
-        game.isBussing.forEach((state, j) => {
-          if (state)
-            bussataMsg += `${
-              game.names[j]
-              // TODO tell type of bussata
-            } ha bussato, le sue carte:\n${numsToString(game.hands[j])}\n`;
+        game.isBussing.forEach((bussType, j) => {
+          if (j !== i)
+            if (bussType !== 0)
+              bussataMsg += `\n${
+                game.names[j]
+                // tell type of bussata
+              } ha bussato da ${
+                bussType === 1 ? 3 : 10
+              }, le sue carte:\n${numsToString(game.hands[j])}\n`;
         });
 
-        sendToUser(chatId, message + userDecksMsg + bussataMsg).then(() => {
+        sendToUser(chatId, message + userDecksMsg).then(() => {
           if (i === activeUser)
-            sendToUser(game.chatIds[activeUser], `Tocca a te`, handButtons, 3);
+            sendToUser(
+              game.chatIds[activeUser],
+              `Tocca a te ${bussataMsg}`,
+              handButtons,
+              3
+            );
           else
             sendToUser(
               chatId,

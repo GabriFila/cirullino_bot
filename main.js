@@ -10,8 +10,12 @@ const helpHandler = require('./userMsgs.js/commands/help');
 const aboutHandler = require('./userMsgs.js/commands/about');
 const playHandler = require('./userMsgs.js/commands/play');
 const enterHandler = require('./userMsgs.js/commands/enter');
-const refuseHandler = require('./userMsgs.js/refuse');
 const privacyHandler = require('./userMsgs.js/commands/privacy');
+const howHandler = require('./userMsgs.js/commands/how');
+const statusHandler = require('./userMsgs.js/commands/status');
+
+// general text handlers
+const refuseHandler = require('./userMsgs.js/refuse');
 const bussataHandler = require('./userMsgs.js/bussata');
 
 // user msg handlers
@@ -70,6 +74,10 @@ bot.command(['newgame', 'sfida'], playHandler);
 bot.command(['enter', 'entra'], enterHandler);
 
 bot.command('privacy', privacyHandler);
+
+bot.command('come', howHandler);
+
+bot.command('status', statusHandler);
 
 bot.hears(new RegExp(cardRegEx), cardHandler);
 
