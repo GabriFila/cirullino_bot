@@ -62,23 +62,6 @@ checkOpponents.enter(ctx => {
 
       ctx.session.pendingGame = pendingGame;
       ctx.scene.enter('call-opponents');
-      /*
-
-      get an object for each opponent
-      then sort them
-      then map them to pending game
-
-      then send to all except the one with the user equal to the sender
-
-      create new pending game 
-      {
-        chatIds, [002,23402305]
-        usernames: [gabrifila, ritagari],
-        hasAccepted: [true, false],
-        names: [Gabriele, Margherita]
-      }
-       when all accept the object transforms in game
-      */
     })
     .catch(err => {
       if (err.message === 'no registered') {
