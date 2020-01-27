@@ -13,7 +13,7 @@ module.exports = ctx => {
   const senderUsername = ctx.message.from.username.toLowerCase();
   // check if there is a active group with user in it
 
-  // TODO make one function to check if user is playing
+  // TODO make one function to check if user is playing for other scenes
   db.collection('groups')
     .where('isActive', '==', true)
     .where('usernames', 'array-contains', senderUsername)

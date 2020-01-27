@@ -10,7 +10,7 @@ const sendToUser = require('../helpers/general/sendToUser');
 const buildGame = new Scene('build-game');
 
 buildGame.enter(ctx => {
-  console.info('buildfing game');
+  console.info('building game');
   const { updatedPlayers } = ctx.session;
 
   const game = prepGame(
@@ -24,7 +24,7 @@ buildGame.enter(ctx => {
   let boardStartMessage = '';
 
   // first step of first hand of game
-  console.log('checking for points in board');
+  console.log('checking for points inside board');
   const boardTotal = getBoardTotal(game.board);
   const cardGiver = circularBefore(activeUser, game.chatIds);
 
