@@ -20,7 +20,6 @@ buildGame.enter(ctx => {
   );
 
   const { activeUser } = game;
-  // TODO implement possibility of starting with empty board when board total is 15 or 30
   let boardStartMessage = '';
 
   // first step of first hand of game
