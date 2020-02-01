@@ -21,6 +21,7 @@ module.exports = card => {
   };
 
   const suit = suitMap[card.charAt(1)];
+
   return value + suit;
 };
 

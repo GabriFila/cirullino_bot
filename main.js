@@ -32,13 +32,16 @@ const activateGroup = require('./scenes/activateGroup');
 const buildGame = require('./scenes/buildGame');
 const startGame = require('./scenes/startGame');
 
+const askMattaValue = require('./scenes/askMattaValue');
+const checkBussata = require('./scenes/checkBussata');
+
 const showCatches = require('./scenes/showCatches');
 const checkCatch = require('./scenes/checkCatch');
 const shareMove = require('./scenes/shareMove');
 
 const endGame = require('./scenes/endGame');
 
-const { cardRegEx } = require('./helpers/utils.json');
+const { cardRegEx } = require('./helpers/utils');
 // get bot
 const bot = require('./bot');
 
@@ -50,6 +53,8 @@ stage.register(countOpponents);
 stage.register(checkOpponents);
 stage.register(callOpponents);
 stage.register(activateGroup);
+stage.register(askMattaValue);
+stage.register(checkBussata);
 stage.register(buildGame);
 stage.register(startGame);
 stage.register(endGame);

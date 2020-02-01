@@ -1,15 +1,13 @@
 /* eslint-disable no-console */
-const { Markup } = require('telegraf');
 const Scene = require('telegraf/scenes/base');
+const dispButtons = require('../helpers/general/dispButtons');
 const cardToNum = require('../helpers/game/cardToNum');
 const arrayInclude = require('../helpers/general/arrayInclude');
 const numsToString = require('../helpers/game/numsToString');
 
 const checkCatch = new Scene('check-catch');
 
-const { cardRegEx } = require('../helpers/utils.json');
-
-// const { isCatchValid } = require('../helpers/game');
+const { cardRegEx } = require('../helpers/utils');
 
 // take target catch from user and
 checkCatch.hears(new RegExp(cardRegEx, 'g'), ctx => {
@@ -23,10 +21,14 @@ checkCatch.hears(new RegExp(cardRegEx, 'g'), ctx => {
   } else {
     ctx.reply(
       '⚠️Mossa non valida, non puoi prendere questa combinazione di carte. Riprova',
-      Markup.keyboard(ctx.session.catches.map(elm => numsToString(elm)))
-        .oneTime()
-        .resize()
-        .extra()
+      dispButtons(
+        ctx.session.catches.map(elm => numsToString(elm)),
+        1
+      )
+      // Markup.keyboard()
+      //   .oneTime()
+      //   .resize()
+      //   .extra()
     );
     ctx.scene.enter('check-catch');
   }

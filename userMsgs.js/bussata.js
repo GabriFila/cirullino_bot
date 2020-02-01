@@ -3,9 +3,9 @@
 
 /* eslint-disable no-console */
 const { db } = require('../firebase');
-const isBussata = require('../helpers/game/isBussata');
-const areLess9 = require('../helpers/game/areLess9');
-const are3EqualCards = require('../helpers/game/are3EqualCards');
+// const isBussata = require('../helpers/game/isBussata');
+// const areLess9 = require('../helpers/game/areLess9');
+// const are3EqualCards = require('../helpers/game/are3EqualCards');
 
 module.exports = ctx => {
   // when bot receives a card it checks if the user has an active game, if so it checks if it is the active user, then processes the move e updates the other players
@@ -28,20 +28,11 @@ module.exports = ctx => {
               // check if group has an active game
               const game = doc.data();
               const { activeUser } = game;
-
-              if (isBussata(game.hands[activeUser])) {
-                if (game.isBussing[activeUser] === 0) {
-                  if (areLess9(game.hands[activeUser])) {
-                    game.isBussing[activeUser] = 1;
-                    game.bonusPoints[activeUser] += 3;
-                  }
-                  if (are3EqualCards(game.hands[activeUser])) {
-                    game.isBussing[activeUser] = 2;
-                    game.bonusPoints[activeUser] += 10;
-                  }
-                }
-                doc.ref.set(game, { merge: true });
-              } else ctx.reply(`Non puoi bussare ora`);
+              ctx.session.game = game;
+              ctx.session.gameDbRef = doc.ref;
+              if (game.hands[activeUser].includes(7)) {
+                ctx.scene.enter('ask-matta-value');
+              }
             } else {
               ctx.reply(
                 '⚠️Mi dispiace ma non stai giocando con nessuno al momento.\nPer iniziare usa /sfida'

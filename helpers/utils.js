@@ -1,7 +1,9 @@
-{
-  "helpMessage": "Per iniziare una partita scrivi /sfida\nPer avere info sulla privacy scrivi /privacy\nPer sapere di più su questo bot scrivi /about",
-  "cardRegEx": "[A0123456789JQK][♥️♦♣♠]",
-  "deck40": [
+module.exports = {
+  helpMessage:
+    'Per iniziare una partita scrivi /sfida\nPer avere info sulla privacy scrivi /privacy\nPer sapere di più su questo bot scrivi /about',
+  possibleValues: ['A', '2', '3', '4', '5', '6', '7', 'J', 'Q', 'K'],
+  cardRegEx: '[A0123456789JQK][♥️♦♣♠]',
+  deck40: [
     1,
     2,
     3,
@@ -43,4 +45,4 @@
     39,
     40
   ]
-}
+};

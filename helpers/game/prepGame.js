@@ -1,7 +1,7 @@
 /* eslint-disable no-plusplus */
 const getRandomInt = require('../general/getRandomInt');
 const getValue = require('./getValue');
-const { deck40 } = require('../utils.json');
+const { deck40 } = require('../utils');
 
 module.exports = (chatIds, names, usernames) => {
   const shuffledDeck = deck40.sort(() => Math.random() - 0.5);
@@ -19,7 +19,8 @@ module.exports = (chatIds, names, usernames) => {
     activeUser: getRandomInt(0, chatIds.length),
     chatIds,
     names,
-    usernames
+    usernames,
+    mattaValue: 0
   };
 
   chatIds.forEach((chat, i) => {
@@ -56,6 +57,8 @@ module.exports = (chatIds, names, usernames) => {
       );
     }
   }
+
+  // check if there are 3 equal cards
   const sortedBoard = game.board.sort();
   if (
     getValue(sortedBoard[0]) === getValue(sortedBoard[1]) &&

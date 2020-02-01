@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 const Scene = require('telegraf/scenes/base');
-const { Markup } = require('telegraf');
+const dispButtons = require('../helpers/general/dispButtons');
 const feasibleCatches = require('../helpers/game/feasibleCatches');
 const numsToString = require('../helpers/game/numsToString');
 
@@ -26,10 +26,10 @@ showCatches.enter(ctx => {
     // ask user right intention
     ctx.reply(
       'Cosa vuoi prendere?',
-      Markup.keyboard(catches.map(set => numsToString(set)))
-        .oneTime()
-        .resize()
-        .extra()
+      dispButtons(
+        catches.map(set => numsToString(set)),
+        1
+      )
     );
     // pass possible catches to next scene for checking
     ctx.session.catches = catches;
