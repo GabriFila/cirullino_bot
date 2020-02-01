@@ -29,7 +29,7 @@ startGame.enter(ctx => {
         game.board.length === 0
           ? 'Tavola vuota\n'
           : `In tavola:   ${numsToString(game.board)}\n`;
-
+      console.log('matta', game.mattaValue);
       // TODO implement Matta
       game.chatIds.forEach((chatId, i) => {
         let userDecksMsg = `Hai:\n  scope: ${game.userStrongDeck[i].length}\n  mazzetto: ${game.userWeakDeck[i].length}\n`;
@@ -38,7 +38,8 @@ startGame.enter(ctx => {
 
         const handButtons = game.hands[i].map(num => numToCard(num));
 
-        if (isBussata(game.hands[i])) handButtons.push('Bussare');
+        if (isBussata(game.hands[i], game.mattaValue))
+          handButtons.push('Bussare');
 
         let bussataMsg = ``;
 

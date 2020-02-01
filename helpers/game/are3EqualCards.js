@@ -1,12 +1,16 @@
 const getValue = require('./getValue');
 
-module.exports = hand => {
-  if (hand.some(card => card === 7)) {
-    const handNoMatta = hand.filter(card => card !== 7);
-    return getValue(handNoMatta[0]) === getValue(handNoMatta[1]);
+module.exports = (hand, mattaValue) => {
+  if (hand.includes(7) && mattaValue === 0) {
+    console.log('here');
+    const handNoMatta = hand.filter(num => num !== 7);
+    return (
+      getValue(handNoMatta[0], mattaValue) ===
+      getValue(handNoMatta[1], mattaValue)
+    );
   }
   return (
-    getValue(hand[0]) === getValue(hand[1]) &&
-    getValue(hand[0]) === getValue(hand[2])
+    getValue(hand[0], mattaValue) === getValue(hand[1], mattaValue) &&
+    getValue(hand[0], mattaValue) === getValue(hand[2], mattaValue)
   );
 };

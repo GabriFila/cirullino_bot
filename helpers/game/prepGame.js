@@ -26,6 +26,7 @@ module.exports = (chatIds, names, usernames) => {
   chatIds.forEach((chat, i) => {
     game.hands[i] = shuffledDeck.splice(0, 3);
   });
+  game.hands = { 0: [3, 6, 7], 1: [12, 15, 7] };
   chatIds.forEach((chat, i) => {
     game.userStrongDeck[i] = [];
   });
