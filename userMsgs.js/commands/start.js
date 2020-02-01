@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 const { db } = require('../../firebase');
-const { helpMessage } = require('../../helpers/utils.json');
+const { helpMessage } = require('../../helpers/utils');
 
 module.exports = ctx => {
   console.log('/start');

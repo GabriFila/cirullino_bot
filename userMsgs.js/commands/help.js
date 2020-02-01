@@ -1,4 +1,4 @@
-const { helpMessage } = require('../../helpers/utils.json');
+const { helpMessage } = require('../../helpers/utils');
 
 module.exports = ctx => {
   console.log('/help');

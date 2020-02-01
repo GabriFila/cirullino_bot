@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
-const { Markup } = require('telegraf');
+
 const { db } = require('../../firebase');
+const dispButtons = require('../../helpers/general/dispButtons');
 const parseUsername = require('../../helpers/general/parseUsername');
 
 module.exports = ctx => {
@@ -22,10 +23,7 @@ module.exports = ctx => {
         console.info('/newgame');
         ctx.reply(
           'Con quante persone vuoi giocare? ',
-          Markup.keyboard(['1', '2', '3'], { columns: 3 })
-            .oneTime()
-            .resize()
-            .extra()
+          dispButtons(['1', '2', '3'])
         );
         // ctx.reply(`Chi vuoi sfidare? Dimmi l'username`);
         ctx.scene.enter('count-opponents');

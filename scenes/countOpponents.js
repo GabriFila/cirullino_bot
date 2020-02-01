@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
-const { Markup } = require('telegraf');
 const Scene = require('telegraf/scenes/base');
+const dispButtons = require('../helpers/general/dispButtons');
 const parseUsername = require('../helpers/general/parseUsername');
 
 const countOpponents = new Scene('count-opponents');
@@ -35,13 +35,7 @@ countOpponents.on('text', ctx => {
     } else
       ctx.reply('Il tuo username è già compreso, dimmi gli altri giocatori');
   } else
-    ctx.reply(
-      'Devi dirmi un numero tra 1 e 3',
-      Markup.keyboard(['1', '2', '3'], { columns: 3 })
-        .oneTime()
-        .resize()
-        .extra()
-    );
+    ctx.reply('Devi dirmi un numero tra 1 e 3', dispButtons(['1', '2', '3']));
 });
 
 module.exports = countOpponents;
