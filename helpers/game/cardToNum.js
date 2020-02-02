@@ -1,6 +1,20 @@
 // function to convert a card from string to integer
 
 module.exports = card => {
+  // if (card.length > 2) {
+  //   let value = card.charAt(3);
+
+  //   if (Number.isNaN(Number(value))) {
+  //     const valueMap = {
+  //       A: 1,
+  //       J: 8,
+  //       Q: 9,
+  //       K: 10
+  //     };
+  //     value = valueMap[value];
+  //   } else value = Number(value);
+  //   return value;
+  // }
   let value = card.charAt(0);
 
   if (Number.isNaN(Number(value))) {

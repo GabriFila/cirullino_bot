@@ -27,6 +27,7 @@ buildGame.enter(ctx => {
   const boardTotal = getBoardTotal(game.board);
   const cardGiver = circularBefore(activeUser, game.chatIds);
 
+  // TODO fix message to user for points of board when starting
   boardStartMessage = `${game.names[cardGiver]} da le carte!\n${game.names[activeUser]} inizia!\n`;
   if (boardTotal === 30)
     for (let i = 0; i < 2; i += 1) {

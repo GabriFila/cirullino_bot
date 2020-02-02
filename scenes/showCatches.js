@@ -10,7 +10,8 @@ const showCatches = new Scene('show-catches');
 showCatches.enter(ctx => {
   console.log('showing catches'.green);
   const { game, usedNum } = ctx.session;
-  let catches = feasibleCatches(game.board, usedNum);
+  const { mattaValue } = game;
+  let catches = feasibleCatches(game.board, usedNum, mattaValue);
   // remove duplicates caused by 'presa con 15' and 'presa con somma'
   catches = catches.filter((elm, i) => catches.indexOf(elm) === i);
 

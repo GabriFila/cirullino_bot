@@ -13,8 +13,8 @@ shareMove.enter(ctx => {
   const { userCatch, usedNum, game } = ctx.session;
   let message = '';
   // check if calata
-  const { activeUser } = game;
-  const usedCard = numToCard(usedNum);
+  const { activeUser, mattaValue } = game;
+  const usedCard = numToCard(usedNum, mattaValue);
 
   if (userCatch.length === 0) {
     message = `calato ${usedCard}`;
@@ -31,7 +31,7 @@ shareMove.enter(ctx => {
       game.userStrongDeck[activeUser].push(ctx.session.usedNum);
     } else {
       // not scopa
-      message = `preso ${numsToString(userCatch)} con ${usedCard}`;
+      message = `preso ${numsToString(userCatch, mattaValue)} con ${usedCard}`;
       game.userWeakDeck[activeUser].push(ctx.session.usedNum);
     }
   }

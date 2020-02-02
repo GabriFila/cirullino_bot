@@ -25,10 +25,6 @@ checkCatch.hears(new RegExp(cardRegEx, 'g'), ctx => {
         ctx.session.catches.map(elm => numsToString(elm)),
         1
       )
-      // Markup.keyboard()
-      //   .oneTime()
-      //   .resize()
-      //   .extra()
     );
     ctx.scene.enter('check-catch');
   }

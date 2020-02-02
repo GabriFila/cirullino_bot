@@ -16,7 +16,8 @@ askMattaValue.enter(ctx =>
 askMattaValue.hears(possibleValues, ctx => {
   ctx.reply(`Il tuo 7\u2665 vale ${ctx.message.text}`);
   // FIXME find index of array for value
-  ctx.session.game.mattaValue = ctx.message.text;
+  ctx.session.game.mattaValue =
+    possibleValues.findIndex(value => value === String(ctx.message.text)) + 1;
   ctx.scene.enter('check-bussata');
 });
 

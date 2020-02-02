@@ -18,7 +18,7 @@ const numToCard = (num, mattaValue) => {
   card += value;
   card += suit;
   if (num === 7 && mattaValue !== undefined && mattaValue !== 0)
-    card += `(${numToCard(mattaValue)})`;
+    card += `(${values[getValue(mattaValue)]})`;
   return card;
 };
 

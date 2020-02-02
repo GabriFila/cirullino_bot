@@ -21,7 +21,7 @@ checkBussata.enter(ctx => {
         game.bonusPoints[activeUser] += 10;
       }
     }
-    ctx.seesion.gameDbRef.set(game, { merge: true });
+    ctx.session.gameDbRef.set(game, { merge: true });
   } else ctx.reply(`Non puoi bussare ora`);
 });
 

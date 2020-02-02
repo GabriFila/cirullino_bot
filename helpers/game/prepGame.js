@@ -16,7 +16,7 @@ module.exports = (chatIds, names, usernames) => {
     moves: [],
     userStrongDeck: {},
     userWeakDeck: {},
-    activeUser: getRandomInt(0, chatIds.length),
+    activeUser: 0, // getRandomInt(0, chatIds.length),
     chatIds,
     names,
     usernames,
@@ -26,7 +26,7 @@ module.exports = (chatIds, names, usernames) => {
   chatIds.forEach((chat, i) => {
     game.hands[i] = shuffledDeck.splice(0, 3);
   });
-  game.hands = { 0: [3, 6, 7], 1: [12, 15, 7] };
+  game.hands = { 0: [3, 5, 7], 1: [12, 15, 18] };
   chatIds.forEach((chat, i) => {
     game.userStrongDeck[i] = [];
   });
@@ -60,6 +60,7 @@ module.exports = (chatIds, names, usernames) => {
   }
 
   // check if there are 3 equal cards
+  // FIXME problem with checking 3 equal cards
   const sortedBoard = game.board.sort();
   if (
     getValue(sortedBoard[0]) === getValue(sortedBoard[1]) &&
