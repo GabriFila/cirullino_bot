@@ -16,7 +16,7 @@ module.exports = (chatIds, names, usernames) => {
     moves: [],
     userStrongDeck: {},
     userWeakDeck: {},
-    activeUser: 0, // getRandomInt(0, chatIds.length),
+    activeUser: getRandomInt(0, chatIds.length),
     chatIds,
     names,
     usernames,
@@ -26,7 +26,6 @@ module.exports = (chatIds, names, usernames) => {
   chatIds.forEach((chat, i) => {
     game.hands[i] = shuffledDeck.splice(0, 3);
   });
-  game.hands = { 0: [3, 5, 7], 1: [12, 15, 18] };
   chatIds.forEach((chat, i) => {
     game.userStrongDeck[i] = [];
   });
@@ -60,8 +59,8 @@ module.exports = (chatIds, names, usernames) => {
   }
 
   // check if there are 3 equal cards
-  // FIXME problem with checking 3 equal cards
-  const sortedBoard = game.board.sort();
+  game.board = [5, 15, 25, 4];
+  const sortedBoard = game.board.sort((a, b) => a - b);
   if (
     getValue(sortedBoard[0]) === getValue(sortedBoard[1]) &&
     getValue(sortedBoard[0]) === getValue(sortedBoard[2])
@@ -72,11 +71,27 @@ module.exports = (chatIds, names, usernames) => {
     // take one diffferent card from deck in board
     game.board.push(
       ...game.deck.splice(
-        game.deck.findIndex(card => getValue(card) !== 1),
+        game.deck.findIndex(
+          card =>
+            getValue(card) !== 1 && getValue(card) !== getValue(game.board[0])
+        ),
+        1
+      )
+    );
+  } else if (
+    getValue(sortedBoard[1]) === getValue(sortedBoard[2]) &&
+    getValue(sortedBoard[1]) === getValue(sortedBoard[3])
+  ) {
+    game.deck.push(...game.board.splice(3, 1));
+    game.board.push(
+      ...game.deck.splice(
+        game.deck.findIndex(
+          card =>
+            getValue(card) !== 1 && getValue(card) !== getValue(game.board[1])
+        ),
         1
       )
     );
   }
-
   return game;
 };
