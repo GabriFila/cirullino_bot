@@ -59,7 +59,8 @@ module.exports = (chatIds, names, usernames) => {
   }
 
   // check if there are 3 equal cards
-  const sortedBoard = game.board.sort();
+  game.board = [5, 15, 25, 4];
+  const sortedBoard = game.board.sort((a, b) => a - b);
   if (
     getValue(sortedBoard[0]) === getValue(sortedBoard[1]) &&
     getValue(sortedBoard[0]) === getValue(sortedBoard[2])
@@ -70,11 +71,27 @@ module.exports = (chatIds, names, usernames) => {
     // take one diffferent card from deck in board
     game.board.push(
       ...game.deck.splice(
-        game.deck.findIndex(card => getValue(card) !== 1),
+        game.deck.findIndex(
+          card =>
+            getValue(card) !== 1 && getValue(card) !== getValue(game.board[0])
+        ),
+        1
+      )
+    );
+  } else if (
+    getValue(sortedBoard[1]) === getValue(sortedBoard[2]) &&
+    getValue(sortedBoard[1]) === getValue(sortedBoard[3])
+  ) {
+    game.deck.push(...game.board.splice(3, 1));
+    game.board.push(
+      ...game.deck.splice(
+        game.deck.findIndex(
+          card =>
+            getValue(card) !== 1 && getValue(card) !== getValue(game.board[1])
+        ),
         1
       )
     );
   }
-
   return game;
 };

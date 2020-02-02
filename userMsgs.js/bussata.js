@@ -32,7 +32,7 @@ module.exports = ctx => {
               ctx.session.gameDbRef = doc.ref;
               if (game.hands[activeUser].includes(7)) {
                 ctx.scene.enter('ask-matta-value');
-              }
+              } else ctx.scene.enter('check-bussata');
             } else {
               ctx.reply(
                 '⚠️Mi dispiace ma non stai giocando con nessuno al momento.\nPer iniziare usa /sfida'

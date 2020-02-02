@@ -23,7 +23,7 @@ module.exports = ctx => {
               const game = doc.data();
               const { activeUser } = game;
               if (game.chatIds[activeUser] === ctx.message.chat.id) {
-                console.info('validating hand'.green);
+                console.log('turn ok'.green);
                 const usedNum = cardToNum(ctx.message.text);
 
                 // check if user used own card
@@ -40,7 +40,6 @@ module.exports = ctx => {
                   ctx.session.usedNum = usedNum;
                   ctx.session.gameDbRef = doc.ref;
                   ctx.scene.enter('show-catches');
-                  console.log('turn ok');
                 }
               } else {
                 ctx.reply('⚠️Non è il tuo turno!');

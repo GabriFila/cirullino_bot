@@ -23,48 +23,49 @@ startGame.enter(ctx => {
     } else {
       console.info('ask-move');
 
-      const { activeUser } = game;
+      const { activeUser, mattaValue } = game;
 
       const message =
         game.board.length === 0
           ? 'Tavola vuota\n'
-          : `In tavola:   ${numsToString(game.board)}\n`;
-
+          : `In tavola:   ${numsToString(game.board, mattaValue)}\n`;
       // TODO implement Matta
       game.chatIds.forEach((chatId, i) => {
-        let userDecksMsg = `Hai:\n  scope: ${game.userStrongDeck[i].length}\n  mazzetto: ${game.userWeakDeck[i].length}\n`;
+        let userDecksMsg = `Hai:\n  scope: ${game.userStrongDeck[i].length}\n  mazzetto: ${game.userWeakDeck[i].length}\n\n`;
         if (game.bonusPoints[i] !== 0)
           userDecksMsg += `Punti bonus: ${game.bonusPoints[i]}\n`;
 
-        const handButtons = game.hands[i].map(num => numToCard(num));
+        const handButtons = game.hands[i].map(num =>
+          numToCard(num, mattaValue)
+        );
 
-        if (isBussata(game.hands[i])) handButtons.push('Bussare');
+        if (game.isBussing[i] === 0 && isBussata(game.hands[i], mattaValue))
+          handButtons.push('Bussare');
 
         let bussataMsg = ``;
 
         game.isBussing.forEach((bussType, j) => {
           if (j !== i)
             if (bussType !== 0)
-              bussataMsg += `\n${
+              bussataMsg += `${
                 game.names[j]
                 // tell type of bussata
               } ha bussato da ${
                 bussType === 1 ? 3 : 10
-              }, le sue carte:\n${numsToString(game.hands[j])}\n`;
+              }, le sue carte:\n${numsToString(game.hands[j], mattaValue)}\n`;
         });
-
-        sendToUser(chatId, message + userDecksMsg).then(() => {
+        sendToUser(chatId, message + userDecksMsg + bussataMsg).then(() => {
           if (i === activeUser)
             sendToUser(
               game.chatIds[activeUser],
-              `Tocca a te ${bussataMsg}`,
+              `Tocca a te\n`,
               handButtons,
               3
             );
           else
             sendToUser(
               chatId,
-              `Tocca a ${game.names[activeUser]}`,
+              `Tocca a ${game.names[activeUser]}\n`,
               handButtons,
               3
             );

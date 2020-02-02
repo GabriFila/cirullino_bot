@@ -1,9 +1,9 @@
 const getValue = require('./getValue');
 
-module.exports = hand => {
-  return (
-    hand
-      .map(card => (card === 7 ? 1 : card))
-      .reduce((acc, val) => (acc += getValue(val)), 0) <= 9
-  );
+module.exports = (hand, mattaValue) => {
+  if (hand.includes(7) && mattaValue === 0) {
+    const handNoMatta = hand.filter(num => num !== 7);
+    return handNoMatta.reduce((acc, val) => (acc += getValue(val)), 0) <= 8;
+  }
+  return hand.reduce((acc, val) => (acc += getValue(val, mattaValue)), 0) <= 9;
 };
