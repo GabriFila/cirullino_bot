@@ -1,5 +1,7 @@
 require('colors');
 
+require('./keepAliveEP');
+
 // telegraf dependacies
 const session = require('telegraf/session');
 const Stage = require('telegraf/stage');
