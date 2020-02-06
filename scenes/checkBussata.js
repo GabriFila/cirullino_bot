@@ -10,7 +10,6 @@ checkBussata.enter(ctx => {
   const { game } = ctx.session;
   const { activeUser, mattaValue } = game;
   if (isBussata(game.hands[activeUser], mattaValue)) {
-    // TODO make isBussata array better in case of both less than 9 and 3 equal cards
     if (game.isBussing[activeUser] === 0) {
       if (areLess9(game.hands[activeUser], mattaValue)) {
         game.isBussing[activeUser] += 1;
