@@ -5,7 +5,7 @@ const fetch = require('node-fetch');
 const { BOT_TOKEN, ENV, PORT, URL } = require('./config');
 
 const bot = new Telegraf(BOT_TOKEN);
-
+console.log(PORT);
 if (ENV === 'dev') {
   fetch(`https://api.telegram.org/bot${BOT_TOKEN}/deleteWebhook`)
     .then(() => {

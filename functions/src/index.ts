@@ -6,6 +6,7 @@ export const keepHerokuAlive = functions
   .pubsub.schedule('every 25 minutes')
   .onRun(() => {
     return fetch('https://cirullino-bot.herokuapp.com/')
-      .then(res => console.log(res))
+      .then(res => res.json())
+      .then(body => console.log(body))
       .catch(err => console.log('err'));
   });
