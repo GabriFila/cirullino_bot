@@ -2,7 +2,7 @@
 Un bot di telegram per giocare a cirulla con gli amici
 
 
-Questo bot è scritto in JavaScript ed utilizza il framework [Telegraf.js](https://telegraf.js.org/#/). Questo framework è molto interessante ma ha una documentazione molto povera e mal strutturata. Avrei preferito scrviere il codice in TypeScript ma, anche in questo caso, il supporto lascia desiderare. Un altro componente
+Questo bot è scritto in JavaScript ed utilizza il framework [Telegraf.js](https://telegraf.js.org/#/). Questo framework è molto capace ma ha una documentazione molto povera e mal strutturata. Avrei preferito scrivere il codice in TypeScript ma, anche in questo caso, il supporto lascia desiderare.
 
 ## Struttura
 Ad alto livello il bot è composto da diversi percorsi. Ognuno iniziato da un particolare comando.
