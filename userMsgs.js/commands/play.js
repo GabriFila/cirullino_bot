@@ -23,19 +23,12 @@ module.exports = ctx => {
       });
       batch.commit().then(() => {
         console.info('/newgame');
-        // ctx.reply(
-        //   'Con quante persone vuoi giocare? ',
-        //   dispButtons(['1', '2', '3'])
-        // );
-        sendToUser(
-          ctx.message.from.id,
-          'Con quante persone vuoi giocare? ',
-          dispButtons(['1', '2', '3'])
-        );
-        console.log(ctx.message.from.id);
-        console.log('start message sent');
+        sendToUser(ctx.message.from.id, 'Con quante persone vuoi giocare? ', [
+          '1',
+          '2',
+          '3'
+        ]);
 
-        // ctx.reply(`Chi vuoi sfidare? Dimmi l'username`);
         ctx.scene.enter('count-opponents');
       });
     })
