@@ -25,6 +25,8 @@ module.exports = ctx => {
           'Con quante persone vuoi giocare? ',
           dispButtons(['1', '2', '3'])
         );
+        console.log('start message sent');
+
         // ctx.reply(`Chi vuoi sfidare? Dimmi l'username`);
         ctx.scene.enter('count-opponents');
       });
