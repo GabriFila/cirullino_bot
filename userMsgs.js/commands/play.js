@@ -3,6 +3,7 @@
 const { db } = require('../../firebase');
 const dispButtons = require('../../helpers/general/dispButtons');
 const parseUsername = require('../../helpers/general/parseUsername');
+const sendToUser = require('../../helpers/general/sendToUser');
 
 module.exports = ctx => {
   db.collection('pendingGames')
@@ -25,6 +26,12 @@ module.exports = ctx => {
         //   'Con quante persone vuoi giocare? ',
         //   dispButtons(['1', '2', '3'])
         // );
+        sendToUser(
+          ctx.message.from.id,
+          'Con quante persone vuoi giocare? ',
+          dispButtons(['1', '2', '3'])
+        );
+        console.log(ctx.message.from.id);
         console.log('start message sent');
 
         // ctx.reply(`Chi vuoi sfidare? Dimmi l'username`);
