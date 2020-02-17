@@ -5,7 +5,7 @@ module.exports = http
     console.log('kseeping alive');
     response.end('Hello Node.js Server!');
   })
-  .listen(80, err => {
+  .listen(3000, err => {
     if (err) {
       console.log(`Server didn't started`, err);
     }

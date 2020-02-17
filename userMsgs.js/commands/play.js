@@ -3,8 +3,10 @@
 const { db } = require('../../firebase');
 const dispButtons = require('../../helpers/general/dispButtons');
 const parseUsername = require('../../helpers/general/parseUsername');
+const sendToUser = require('../../helpers/general/sendToUser');
 
 module.exports = ctx => {
+  ctx.reply('Perfetto! Mi preparo per una nuova partita!');
   db.collection('pendingGames')
     .where(
       'usernames',
@@ -21,13 +23,12 @@ module.exports = ctx => {
       });
       batch.commit().then(() => {
         console.info('/newgame');
-        // ctx.reply(
-        //   'Con quante persone vuoi giocare? ',
-        //   dispButtons(['1', '2', '3'])
-        // );
-        console.log('start message sent');
+        sendToUser(ctx.message.from.id, 'Con quante persone vuoi giocare? ', [
+          '1',
+          '2',
+          '3'
+        ]);
 
-        // ctx.reply(`Chi vuoi sfidare? Dimmi l'username`);
         ctx.scene.enter('count-opponents');
       });
     })
