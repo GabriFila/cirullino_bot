@@ -39,6 +39,9 @@ countOpponents.on('text', ctx => {
 });
 
 countOpponents.enter(ctx => {
+  console.log('in count Opponent');
+  console.log(ctx);
+
   ctx.reply('Con quante persone vuoi giocare? ', dispButtons(['1', '2', '3']));
 });
 
