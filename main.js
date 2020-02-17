@@ -1,7 +1,5 @@
 require('colors');
 
-// require('./keepAliveEP');
-
 // telegraf dependacies
 const session = require('telegraf/session');
 const Stage = require('telegraf/stage');
@@ -11,20 +9,18 @@ const startHanlder = require('./userMsgs.js/commands/start');
 const helpHandler = require('./userMsgs.js/commands/help');
 const aboutHandler = require('./userMsgs.js/commands/about');
 const playHandler = require('./userMsgs.js/commands/play');
-const enterHandler = require('./userMsgs.js/commands/enter');
+const joinHandler = require('./userMsgs.js/commands/join');
 const privacyHandler = require('./userMsgs.js/commands/privacy');
 const howHandler = require('./userMsgs.js/commands/how');
 const statusHandler = require('./userMsgs.js/commands/status');
-
-// general text handlers
-const refuseHandler = require('./userMsgs.js/refuse');
-const bussataHandler = require('./userMsgs.js/bussata');
+const exitHandler = require('./userMsgs.js/commands/exit');
 
 // user msg handlers
 const cardHandler = require('./userMsgs.js/card');
+const refuseHandler = require('./userMsgs.js/refuse');
+const bussataHandler = require('./userMsgs.js/bussata');
 
 // scenes
-
 const countOpponents = require('./scenes/countOpponents');
 const checkOpponents = require('./scenes/checkOpponent');
 const callOpponents = require('./scenes/callOpponents');
@@ -78,13 +74,15 @@ bot.command('about', aboutHandler);
 
 bot.command(['newgame', 'sfida'], playHandler);
 
-bot.command(['enter', 'entra'], enterHandler);
+bot.command(['enter', 'entra'], joinHandler);
 
 bot.command('privacy', privacyHandler);
 
 bot.command('come', howHandler);
 
 bot.command('status', statusHandler);
+
+bot.command('exit', exitHandler);
 
 bot.hears(new RegExp(cardRegEx), cardHandler);
 

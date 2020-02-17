@@ -51,13 +51,13 @@ buildGame.enter(ctx => {
   ).then(() => {
     const { groupDbRef } = ctx.session;
     groupDbRef
-      .collection('groupGames')
+      .collection('games')
       .add({
         ...game,
         createdAt: admin.firestore.FieldValue.serverTimestamp()
       })
       .then(gameDbRef => {
-        groupDbRef.set({ activeGame: gameDbRef }, { merge: true });
+        groupDbRef.set({ activeGame: gameDbRef.id }, { merge: true });
         console.info('game created in db');
         ctx.session.gameDbRef = gameDbRef;
         ctx.scene.enter('start-game');
