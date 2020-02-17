@@ -1,6 +1,6 @@
 require('colors');
 
-require('./keepAliveEP');
+// require('./keepAliveEP');
 
 // telegraf dependacies
 const session = require('telegraf/session');
