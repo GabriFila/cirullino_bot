@@ -38,4 +38,8 @@ countOpponents.on('text', ctx => {
     ctx.reply('Devi dirmi un numero tra 1 e 3', dispButtons(['1', '2', '3']));
 });
 
+countOpponents.enter(ctx => {
+  ctx.reply('Con quante persone vuoi giocare? ', dispButtons(['1', '2', '3']));
+});
+
 module.exports = countOpponents;

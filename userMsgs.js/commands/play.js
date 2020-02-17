@@ -21,10 +21,10 @@ module.exports = ctx => {
       });
       batch.commit().then(() => {
         console.info('/newgame');
-        ctx.reply(
-          'Con quante persone vuoi giocare? ',
-          dispButtons(['1', '2', '3'])
-        );
+        // ctx.reply(
+        //   'Con quante persone vuoi giocare? ',
+        //   dispButtons(['1', '2', '3'])
+        // );
         console.log('start message sent');
 
         // ctx.reply(`Chi vuoi sfidare? Dimmi l'username`);
