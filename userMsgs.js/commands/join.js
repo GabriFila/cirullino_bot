@@ -3,7 +3,7 @@ const { db } = require('../../firebase');
 const parseUsername = require('../../helpers/general/parseUsername');
 
 module.exports = ctx => {
-  console.info('/enter');
+  console.info('/join');
 
   // check if there is a pending game with the username
   // if there is , it changes the corresponding state of the player and then if all the players are true the game starts

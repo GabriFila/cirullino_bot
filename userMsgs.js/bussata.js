@@ -19,10 +19,12 @@ module.exports = ctx => {
     .get()
     .then(groups => {
       groups.forEach(group => {
-        group
-          .data()
-          // get active game
-          .activeGame.get()
+        // get active game
+        const { activeGame } = group.data();
+        group.ref
+          .collection('games')
+          .doc(activeGame)
+          .get()
           .then(doc => {
             if (doc.exists) {
               // check if group has an active game

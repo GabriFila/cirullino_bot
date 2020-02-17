@@ -47,7 +47,7 @@ endGame.enter(ctx => {
     () => {
       game.points = results.points;
       gameDbRef.set(game, { merge: true });
-      groupDbRef.set({ isActive: false, activeGame: null }, { merge: true });
+      groupDbRef.set({ isActive: false, activeGame: '' }, { merge: true });
 
       // calculate points
 

@@ -16,7 +16,7 @@ activateGroup.enter(async ctx => {
       const batch = db.batch();
       response.docs.forEach(doc => {
         const docRef = db.collection('groups').doc(doc.id);
-        batch.update(docRef, { isActive: false, activeGame: null });
+        batch.update(docRef, { isActive: false, activeGame: '' });
       });
       batch.commit().then(() => {
         db.collection('groups')
