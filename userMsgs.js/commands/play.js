@@ -6,6 +6,7 @@ const parseUsername = require('../../helpers/general/parseUsername');
 const sendToUser = require('../../helpers/general/sendToUser');
 
 module.exports = ctx => {
+  ctx.reply('Perfetto! Mi preparo per una nuova partita!');
   db.collection('pendingGames')
     .where(
       'usernames',
