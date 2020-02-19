@@ -3,7 +3,7 @@ const indexOfMax = require('../general/indexOfMax');
 const isDiamond = require('./isDiamond');
 
 module.exports = (strongDecks, weakDecks, bonusPoints) => {
-  const points = bonusPoints.map(() => 0);
+  const points = bonusPoints;
   const diamonds = bonusPoints.map(() => 0);
   const cards = bonusPoints.map(() => 0);
   const primiera = bonusPoints.map(() => 0);
@@ -17,7 +17,7 @@ module.exports = (strongDecks, weakDecks, bonusPoints) => {
 
   for (let usr = 0; usr < Object.keys(strongDecks).length; usr += 1) {
     // add #'scope' to points
-    points[usr] = strongDecks[usr].length;
+    points[usr] += strongDecks[usr].length;
     // then pass strong cards into weak
     weakDecks[usr].push(...strongDecks[usr]);
     // count denari
