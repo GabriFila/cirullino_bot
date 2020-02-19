@@ -72,4 +72,6 @@ endGame.enter(ctx => {
   );
 });
 
+endGame.leave(() => console.log('/exit on endGame'));
+
 module.exports = endGame;

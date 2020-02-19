@@ -69,4 +69,6 @@ buildGame.enter(ctx => {
   });
 });
 
+buildGame.leave(() => console.log('/exit on buildGame'));
+
 module.exports = buildGame;

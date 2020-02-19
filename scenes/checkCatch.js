@@ -30,4 +30,6 @@ checkCatch.hears(new RegExp(cardRegEx, 'g'), ctx => {
   }
 });
 
+checkCatch.leave(() => console.log('/exit on checkCatch'));
+
 module.exports = checkCatch;

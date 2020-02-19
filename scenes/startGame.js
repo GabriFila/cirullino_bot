@@ -75,4 +75,6 @@ startGame.enter(ctx => {
   });
 });
 
+startGame.leave(() => console.log('/exit on startGame'));
+
 module.exports = startGame;

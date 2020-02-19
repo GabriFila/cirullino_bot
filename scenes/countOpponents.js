@@ -11,8 +11,8 @@ countOpponents.hears(/^[1-3]$/, ctx => {
   ctx.session.oppUsernames = [];
   ctx.reply(`Dimmi lo username del giocatore 1`);
 });
-
-countOpponents.on('text', ctx => {
+// regex for not command
+countOpponents.hears(/^(?!\/)/, ctx => {
   console.log('told opponent');
 
   if (ctx.session.oppUsernames) {
@@ -38,4 +38,5 @@ countOpponents.on('text', ctx => {
     ctx.reply('Devi dirmi un numero tra 1 e 3', dispButtons(['1', '2', '3']));
 });
 
+countOpponents.leave(() => console.log('/exit on countOpponents'));
 module.exports = countOpponents;

@@ -72,4 +72,6 @@ checkOpponents.enter(ctx => {
     });
 });
 
+checkOpponents.leave(() => console.log('/exit on checkOpponents'));
+
 module.exports = checkOpponents;

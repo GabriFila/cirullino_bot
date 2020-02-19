@@ -38,4 +38,6 @@ showCatches.enter(ctx => {
   }
 });
 
+showCatches.leave(() => console.log('/exit on showCatches'));
+
 module.exports = showCatches;
