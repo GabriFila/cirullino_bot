@@ -5,7 +5,8 @@ const sendToUser = require('../../helpers/general/sendToUser');
 
 module.exports = ctx => {
   console.log('/exit');
-  ctx.reply('Sei uscito, informo gli altri giocatori');
+  ctx.scene.leave();
+  ctx.reply('Sei uscito!');
 
   const exitUsername = parseUsername(ctx.message.from.username);
   // find the game where user is active

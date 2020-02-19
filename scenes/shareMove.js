@@ -95,4 +95,6 @@ shareMove.enter(ctx => {
   });
 });
 
+shareMove.leave(() => console.log('/exit on shareMove'));
+
 module.exports = shareMove;

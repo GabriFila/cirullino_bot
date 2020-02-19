@@ -20,4 +20,6 @@ askMattaValue.hears(possibleValues, ctx => {
   ctx.scene.enter('check-bussata');
 });
 
+askMattaValue.leave(() => console.log('/exit on askMattaValue'));
+
 module.exports = askMattaValue;

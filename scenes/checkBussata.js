@@ -24,4 +24,6 @@ checkBussata.enter(ctx => {
   } else ctx.reply(`Non puoi bussare ora`);
 });
 
+checkBussata.leave(() => console.log('/exit on checkBussata'));
+
 module.exports = checkBussata;

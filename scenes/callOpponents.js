@@ -39,4 +39,6 @@ callOpponents.enter(ctx => {
     .catch(err => console.log(err.message.red));
 });
 
+callOpponents.leave(() => console.log('/exit on callOpponents'));
+
 module.exports = callOpponents;

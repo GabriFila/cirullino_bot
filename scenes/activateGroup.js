@@ -35,4 +35,6 @@ activateGroup.enter(async ctx => {
     });
 });
 
+activateGroup.leave(() => console.log('/exit on activateGroup'));
+
 module.exports = activateGroup;
