@@ -10,10 +10,12 @@ const showCatches = new Scene('show-catches');
 showCatches.enter(ctx => {
   console.log('showing catches'.green);
   const { game, usedNum } = ctx.session;
+  console.log('usedNum: ', usedNum);
   const { mattaValue } = game;
   let catches = feasibleCatches(game.board, usedNum, mattaValue);
   // remove duplicates caused by 'presa con 15' and 'presa con somma'
   catches = catches.filter((elm, i) => catches.indexOf(elm) === i);
+  console.log('catches: ', catches);
 
   if (catches.length === 0) {
     // if length is equal to 0 => 'calata' => no need to check user's choice
