@@ -1,6 +1,6 @@
 module.exports = {
   helpMessage:
-    'sfida - Inizia una nuova partita\nhelp - Info sui possibili comandi\nprivacy - Info sulla privacy\nabout - Info sul bot\ncome - Come giocare a Cirulla\nstatus - Le tue statistiche\nexit - Esci dal gioco',
+    '/sfida - Inizia una nuova partita\n/help - Info sui possibili comandi\n/privacy - Info sulla privacy\n/about - Info sul bot\n/come - Come giocare a Cirulla\n/status - Le tue statistiche\n/exit - Esci dal gioco',
   possibleValues: ['A', '2', '3', '4', '5', '6', '7', 'J', 'Q', 'K'],
   cardRegEx: '[A0123456789JQK][♥️♦♣♠]',
   deck40: [
