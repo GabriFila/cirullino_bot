@@ -45,9 +45,11 @@ shareMove.enter(ctx => {
       console.info('empty hands'.green);
       // reset bussata for next hand
       game.isBussing = game.chatIds.map(() => 0);
+      // redistribute hands
       for (let i = 0; i < Object.keys(game.hands).length; i++)
         game.hands[i] = game.deck.splice(0, 3);
-      const handsLeft = game.deck.length / 6;
+
+      const handsLeft = (game.deck.length / game.chatIds.length) * 3;
       handFinishedMsg = `\nMano terminata, ridiamo le carte!\n`;
       if (handsLeft !== 0) handFinishedMsg += `Mani restanti: ${handsLeft}`;
       else handFinishedMsg += `Ultima mano`;
