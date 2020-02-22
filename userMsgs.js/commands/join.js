@@ -15,16 +15,17 @@ module.exports = ctx => {
   pendingGameRef.get().then(docs => {
     docs.forEach(doc => {
       const updatedPlayers = doc.data();
-
+      console.log(updatedPlayers);
       updatedPlayers.hasAccepted[
         doc.data().usernames.indexOf(senderUsername)
       ] = true;
-
-      if (updatedPlayers.hasAccepted.every(elm => elm === true))
+      doc.ref.set(updatedPlayers, { merge: true });
+      if (updatedPlayers.hasAccepted.every(elm => elm === true)) {
         doc.ref.delete();
 
-      ctx.session.updatedPlayers = updatedPlayers;
-      ctx.scene.enter('activate-group');
+        ctx.session.updatedPlayers = updatedPlayers;
+        ctx.scene.enter('activate-group');
+      }
     });
   });
 };
